@@ -119,6 +119,16 @@ inline std::pair<mockturtle::mig_network, ambit_compiler_statistics> ambit_rewri
   return { out, stat };
 }
 
+inline std::pair<mockturtle::mig_network, ambit_compiler_statistics> ambit_rewrite(
+    ambit_compiler_settings settings,
+    mockturtle::mig_network& ntk)
+{
+    ProgramString dummy;
+    auto result = ambit_rewrite(settings, ntk, dummy);
+    result.second.program_str = nullptr;
+    return result;
+}
+
 inline ambit_compiler_statistics ambit_compile(
     ambit_compiler_settings settings,
     mockturtle::mig_network& ntk,
@@ -133,4 +143,14 @@ inline ambit_compiler_statistics ambit_compile(
   program_out = ProgramString(const_cast<char*>(stat.program_str));
   stat.program_str = nullptr;
   return stat;
+}
+
+inline ambit_compiler_statistics ambit_compile(
+    ambit_compiler_settings settings,
+    mockturtle::mig_network& ntk)
+{
+    ProgramString dummy;
+    auto stat = ambit_compile(settings, ntk, dummy);
+    stat.program_str = nullptr;
+    return stat;
 }
