@@ -4,6 +4,9 @@ mod optimization;
 mod program;
 mod rows;
 
+use std::ffi::CString;
+use std::os::raw::c_char;
+
 use std::sync::LazyLock;
 use std::time::Instant;
 
@@ -125,6 +128,8 @@ struct CompilingReceiverResult<'a> {
     t_runner: u128,
     t_extractor: u128,
     t_compiler: u128,
+
+    program_string: String,
 }
 
 #[ouroboros::self_referencing]
@@ -187,6 +192,9 @@ fn compiling_receiver<'a>(
                 program
             },
         );
+
+        let program_string = output.borrow_program().to_string();
+
         if settings.verbose {
             println!("== Timings");
             println!("t_runner: {t_runner}ms");
@@ -198,6 +206,7 @@ fn compiling_receiver<'a>(
             t_runner,
             t_extractor,
             t_compiler,
+            program_string,
         }
     })
 }
@@ -221,6 +230,8 @@ struct CompilerStatistics {
     t_runner: u64,
     t_extractor: u64,
     t_compiler: u64,
+
+    program_str: *const c_char,
 }
 
 #[no_mangle]
@@ -246,6 +257,8 @@ extern "C" fn ambit_compile_ffi(settings: CompilerSettings) -> MigReceiverFFI<Co
 impl CompilerStatistics {
     fn from_result(res: CompilingReceiverResult) -> Self {
         let graph = res.output.borrow_graph();
+        let c_string = CString::new(res.program_string).expect("CString conversion failed");
+        let ptr = c_string.into_raw();
         CompilerStatistics {
             egraph_classes: graph.number_of_classes() as u64,
             egraph_nodes: graph.total_number_of_nodes() as u64,
@@ -254,6 +267,16 @@ impl CompilerStatistics {
             t_runner: res.t_runner as u64,
             t_extractor: res.t_extractor as u64,
             t_compiler: res.t_compiler as u64,
+            program_str: ptr,
+        }
+    }
+}
+
+#[no_mangle]
+extern "C" fn ambit_free_program_string(ptr: *mut c_char) {
+    if !ptr.is_null() {
+        unsafe {
+            let _ = CString::from_raw(ptr);
         }
     }
 }

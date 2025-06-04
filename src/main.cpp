@@ -21,13 +21,15 @@ int main()
   write_dot( in, "in.dot" );
 
   const auto settings = ambit_compiler_settings{
-      .print_program = true,
-      .verbose = true,
+      .print_program = false,
+      .verbose = false,
       .preoptimize = true,
       .rewrite = true,
   };
 
-  auto [out, result] = ambit_rewrite( settings, in );
+  ProgramString program_str;
+  auto [out, result] = ambit_rewrite( settings, in, program_str );
+  std::cout << "Generated program:\n" << program_str.str() << "\n";
   std::cout << "IC:" << result.instruction_count << std::endl;
   std::cout << "t1:" << result.t_runner << std::endl;
   std::cout << "t2:" << result.t_extractor << std::endl;

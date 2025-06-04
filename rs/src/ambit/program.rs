@@ -54,6 +54,15 @@ impl<'a> Program<'a> {
     }
 }
 
+impl Program<'_> {
+    pub fn to_string(&self) -> String {
+        let mut output = String::new();
+        use std::fmt::Write;
+        let _ = write!(&mut output, "{}", self);
+        output
+    }
+}
+
 impl Instruction {
     pub fn used_addresses<'a>(
         &self,
