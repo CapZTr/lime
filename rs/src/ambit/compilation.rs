@@ -1,17 +1,17 @@
 use super::{
-    optimization::optimize, Address, Architecture, BitwiseOperand, Program, ProgramState,
-    SingleRowAddress,
+    Address, Architecture, BitwiseOperand, Program, ProgramState, SingleRowAddress,
+    optimization::optimize,
 };
 use crate::ambit::rows::Row;
-use eggmock::{Id, Mig, NetworkWithBackwardEdges, Node, Signal};
+use eggmock::{Id, Mig, Network, Node, Signal};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::cmp::max;
 
-pub struct CompilationState<'a, 'n, N> {
-    network: &'n N,
+pub struct CompilationState<'a, 'n> {
+    network: &'n Network<Mig>,
     /// contains all not yet computed network nodes that can be immediately computed (i.e. all
     /// inputs of the node are already computed)
-    candidates: FxHashSet<(Id, Mig)>,
+    candidates: FxHashSet<(Id, Node<Mig>)>,
     program: ProgramState<'a>,
 
     outputs: FxHashSet<Id>,
@@ -20,7 +20,7 @@ pub struct CompilationState<'a, 'n, N> {
 
 pub fn compile<'a>(
     architecture: &'a Architecture,
-    network: &impl NetworkWithBackwardEdges<Node = Mig>,
+    network: &Network<Mig>,
 ) -> Result<Program<'a>, &'static str> {
     let mut state = CompilationState::new(architecture, network);
     let mut max_cand_size = 0;
@@ -31,8 +31,12 @@ pub fn compile<'a>(
             .iter()
             .copied()
             .map(|(id, node)| {
-                let outputs = state.network.node_outputs(id).count();
-                let output = state.network.outputs().any(|out| out.node_id() == id);
+                let outputs = state.network.node_outputs(id).len();
+                let output = state
+                    .network
+                    .outputs()
+                    .iter()
+                    .any(|out| out.node_id() == id);
                 let not_present = node
                     .inputs()
                     .iter()
@@ -50,14 +54,14 @@ pub fn compile<'a>(
             .min_by_key(|(_, _, not_present, outputs, output)| (*not_present, *outputs, !output))
             .unwrap();
         if state.outputs.contains(&id) {
-            for (output, signal) in network.outputs().enumerate() {
+            for (output, signal) in network.outputs().iter().enumerate() {
                 if signal.node_id() != id {
                     continue;
                 }
                 if signal.is_inverted() {
                     state.compute(id, node, None);
                     state.program.signal_copy(
-                        signal,
+                        *signal,
                         SingleRowAddress::Out(output as u64),
                         state.program.rows().get_free_dcc().unwrap_or(0),
                     );
@@ -76,38 +80,39 @@ pub fn compile<'a>(
     }
     // outputs that are directly derived from inputs will not be computed by the loop above
     // let's do that here
-    for (idx, output_sig) in network.outputs().enumerate() {
+    for (idx, output_sig) in network.outputs().iter().enumerate() {
         if !state.outputs.contains(&output_sig.node_id()) {
             continue;
         }
         state
             .program
-            .signal_copy(output_sig, SingleRowAddress::Out(idx as u64), 0);
+            .signal_copy(*output_sig, SingleRowAddress::Out(idx as u64), 0);
     }
     let mut program = state.program.into();
     optimize(&mut program);
     Ok(program)
 }
 
-impl<'a, 'n, N: NetworkWithBackwardEdges<Node = Mig>> CompilationState<'a, 'n, N> {
-    pub fn new(architecture: &'a Architecture, network: &'n N) -> Self {
+impl<'a, 'n> CompilationState<'a, 'n> {
+    pub fn new(architecture: &'a Architecture, network: &'n Network<Mig>) -> Self {
         let mut candidates = FxHashSet::default();
         // check all parents of leafs whether they have only leaf children, in which case they are
         // candidates
-        for leaf in network.leafs() {
-            for candidate_id in network.node_outputs(leaf) {
+        for leaf in network.leaves() {
+            for candidate_signal in network.node_outputs(*leaf) {
+                let candidate_id = candidate_signal.node_id();
                 let candidate = network.node(candidate_id);
                 if candidate
                     .inputs()
                     .iter()
-                    .all(|signal| network.node(signal.node_id()).is_leaf())
+                    .all(|signal| network.node(signal.node_id()).inputs().is_empty())
                 {
-                    candidates.insert((candidate_id, candidate));
+                    candidates.insert((candidate_id, *candidate));
                 }
             }
         }
         let program = ProgramState::new(architecture, network);
-        let outputs = network.outputs().map(|sig| sig.node_id()).collect();
+        let outputs = network.outputs().iter().map(|sig| sig.node_id()).collect();
         Self {
             network,
             candidates,
@@ -119,15 +124,15 @@ impl<'a, 'n, N: NetworkWithBackwardEdges<Node = Mig>> CompilationState<'a, 'n, N
 
     pub fn leftover_use_count(&mut self, id: Id) -> &mut usize {
         self.leftover_use_count.entry(id).or_insert_with(|| {
-            self.network.node_outputs(id).count() + self.outputs.contains(&id) as usize
+            self.network.node_outputs(id).len() + self.outputs.contains(&id) as usize
         })
     }
 
-    pub fn compute(&mut self, id: Id, node: Mig, out_address: Option<Address>) {
+    pub fn compute(&mut self, id: Id, node: Node<Mig>, out_address: Option<Address>) {
         if !self.candidates.remove(&(id, node)) {
             panic!("not a candidate");
         }
-        let Mig::Maj(mut signals) = node else {
+        let Node::Gate(Mig::Maj(mut signals)) = node else {
             panic!("can only compute majs")
         };
 
@@ -198,14 +203,15 @@ impl<'a, 'n, N: NetworkWithBackwardEdges<Node = Mig>> CompilationState<'a, 'n, N
         }
 
         // lastly, determine new candidates
-        for parent_id in self.network.node_outputs(id) {
+        for parent_signal in self.network.node_outputs(id) {
+            let parent_id = parent_signal.node_id();
             let parent_node = self.network.node(parent_id);
             if parent_node
                 .inputs()
                 .iter()
                 .all(|s| self.program.rows().contains_id(s.node_id()))
             {
-                self.candidates.insert((parent_id, parent_node));
+                self.candidates.insert((parent_id, *parent_node));
             }
         }
     }

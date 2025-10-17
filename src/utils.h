@@ -1,15 +1,20 @@
 #pragma once
 
-#include <iostream>
+#include <eggmock.hpp>
 #include <lorina/aiger.hpp>
 #include <lorina/common.hpp>
 #include <lorina/pla.hpp>
 #include <lorina/verilog.hpp>
+#include <mockturtle/algorithms/equivalence_checking.hpp>
+#include <mockturtle/algorithms/miter.hpp>
 #include <mockturtle/generators/arithmetic.hpp>
+#include <mockturtle/generators/control.hpp>
 #include <mockturtle/io/aiger_reader.hpp>
 #include <mockturtle/io/pla_reader.hpp>
 #include <mockturtle/io/verilog_reader.hpp>
 
+#include <iostream>
+#include <mockturtle/networks/mig.hpp>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -21,6 +26,29 @@ template<class ntk>
 std::optional<ntk> read_ntk( std::string const& path );
 
 void preoptimize_mig( mockturtle::mig_network& ntk );
+void preoptimize_aig( mockturtle::aig_network& ntk );
+void preoptimize_xag( mockturtle::xag_network& ntk );
+
+template<class ntk_t>
+void preoptimize( ntk_t& ntk );
+
+template<>
+inline void preoptimize( mockturtle::mig_network& ntk )
+{
+  preoptimize_mig( ntk );
+}
+
+template<>
+inline void preoptimize( mockturtle::aig_network& ntk )
+{
+  preoptimize_aig( ntk );
+}
+
+template<>
+inline void preoptimize( mockturtle::xag_network& ntk )
+{
+  preoptimize_xag( ntk );
+}
 
 template<class ntk_t>
 std::optional<ntk_t> get_ntk( std::string const& key )
@@ -44,17 +72,30 @@ std::optional<ntk_t> get_ntk( std::string const& key )
     return ntk;
   }
 
-  if (key == "mux")
+  // Full subtractor
+  if ( key == "fs" )
+  {
+    ntk_t ntk;
+    const auto in1 = ntk.create_pi();
+    const auto in2 = ntk.create_pi();
+    const auto in3 = ntk.create_pi();
+    const auto [s, c] = mockturtle::full_adder( ntk, in1, !in2, in3 );
+    ntk.create_po( s );
+    ntk.create_po( c );
+    return ntk;
+  }
+
+  if ( key == "mux" )
   {
     ntk_t ntk;
 
-    const auto b_i = ntk.create_pi();
-    const auto b_i_next = ntk.create_pi();
-    const auto m = ntk.create_pi();
+    const auto i1 = ntk.create_pi();
+    const auto i2 = ntk.create_pi();
+    const auto i3 = ntk.create_pi();
 
-    const auto O1 = ntk.create_and( m, b_i_next );
-    const auto O2 = ntk.create_and( ntk.create_not( m ), b_i );
-    const auto bi = ntk.create_or( O1, O2 );
+    const auto O1 = ntk.create_and( !i2, i3 );
+    const auto O2 = ntk.create_maj( !O1, i3, i1 );
+    const auto bi = ntk.create_and( !O1, O2 );
     ntk.create_po( bi );
 
     return ntk;
@@ -127,7 +168,8 @@ std::optional<ntk_t> get_ntk( std::string const& key )
   bool const is_add = key.starts_with( "add" );
   bool const is_mul = key.starts_with( "mul" );
   bool const is_pop = key.starts_with( "pop" );
-  if ( is_add || is_mul || is_pop )
+  bool const is_mux = key.starts_with( "mux" );
+  if ( is_add || is_mul || is_pop || is_mux )
   {
     unsigned long n;
     try
@@ -142,7 +184,7 @@ std::optional<ntk_t> get_ntk( std::string const& key )
     }
 
     ntk_t ntk;
-    auto const gen_inputs = [&] {
+    auto const gen_inputs = [&]( unsigned long n ) {
       std::vector<typename ntk_t::signal> signals;
       signals.reserve( n );
       for ( unsigned long i = 0; i < n; i++ )
@@ -156,16 +198,21 @@ std::optional<ntk_t> get_ntk( std::string const& key )
     if ( is_add )
     {
       auto carry = ntk.get_constant( false );
-      outputs = gen_inputs();
-      mockturtle::carry_ripple_adder_inplace( ntk, outputs, gen_inputs(), carry );
+      outputs = gen_inputs( n );
+      mockturtle::carry_ripple_adder_inplace( ntk, outputs, gen_inputs( n ), carry );
     }
     else if ( is_mul )
     {
-      outputs = mockturtle::carry_ripple_multiplier( ntk, gen_inputs(), gen_inputs() );
+      outputs = mockturtle::carry_ripple_multiplier( ntk, gen_inputs( n ), gen_inputs( n ) );
     }
     else if ( is_pop )
     {
-      outputs = mockturtle::sideways_sum_adder( ntk, gen_inputs() );
+      outputs = mockturtle::sideways_sum_adder( ntk, gen_inputs( n ) );
+    }
+    else if ( is_mux )
+    {
+      auto signal = mockturtle::binary_mux_klein_paterson( ntk, gen_inputs( n ), gen_inputs( 1 << n ) );
+      outputs.emplace_back( signal );
     }
     else
     {
@@ -211,4 +258,14 @@ std::optional<ntk_t> read_ntk( const std::string& path )
     return {};
   }
   return ntk;
+}
+
+template<class ntk_t>
+eggmock::receiver_ffi<bool> new_validator( ntk_t const& in )
+{
+  return eggmock::receive<ntk_t, bool>( [&]( ntk_t out ) {
+    const auto mit = *mockturtle::miter<ntk_t>( in, out );
+    const auto result = mockturtle::equivalence_checking( mit );
+    return result && *result;
+  } );
 }

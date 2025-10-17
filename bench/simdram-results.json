@@ -1,0 +1,422 @@
+[
+  {
+    "benchmark": {
+      "benchmark": "mux",
+      "arch": "simdram",
+      "mode": "exhaustive",
+      "candidate_selection": "all",
+      "rewriting_mode": "none",
+      "rewriting_size_factor": 100
+    },
+    "result": {
+      "result": {
+        "Ok": {
+          "t_preopt": 1,
+          "n_nodes": 7,
+          "n_inputs": 3,
+          "n_outputs": 1,
+          "t_runner": 0,
+          "n_nodes_pre_trim": 10,
+          "t_trim": 0,
+          "n_nodes_post_trim": 10,
+          "t_extractor": 0,
+          "rebuilt_ntk_cost": 0.0,
+          "ntk_size": 7,
+          "t_compile": 10,
+          "t_cost": 9.0,
+          "num_cells": 10,
+          "num_instr": 9,
+          "validation_success": 1
+        }
+      },
+      "t_total": 17,
+      "stdout": "RESULTS\t1\t7\t3\t1\t0\t10\t0\t10\t0\t0\t7\t10\t9\t10\t9\t1\n",
+      "stderr": "preoptimize done\nrewriting to size 100\nTrimmed to size 10\nt-extractor: 0\n=== final program:\n// copy D[1] !-> DCC[0]\nRC(D[1]) -> !DCC[0]\n\n// optimized copy from false to T[1] (inverted: false)\nRC(false) -> !DCC[1], T[1]\n\n// optimized copy from D[2] to T[3] (inverted: false)\nRC(D[2]) -> T[2], T[3]\n\n// compute candidate Id(4)\nTRA(DCC[0], T[1], T[3])\n\n// copy D[0] -> T[0]\nRC(D[0]) -> T[0]\n\n// compute candidate Id(5)\nTRA(DCC[1], T[0], T[2])\n\n// copy false -> T[1]\nRC(false) -> T[1]\n\n// copy DCC[0] !-> T[2]\nRC_INV(DCC[0]) -> T[2]\n\n// compute candidate Id(6)\nTRA(T[0], T[1], T[2]) -> D[0]\n\n\ndone\n"
+    }
+  },
+  {
+    "benchmark": {
+      "benchmark": "fs",
+      "arch": "simdram",
+      "mode": "greedy",
+      "candidate_selection": "all",
+      "rewriting_mode": "greedy",
+      "rewriting_size_factor": 100
+    },
+    "result": {
+      "result": {
+        "Ok": {
+          "t_preopt": 2,
+          "n_nodes": 7,
+          "n_inputs": 3,
+          "n_outputs": 2,
+          "t_runner": 2,
+          "n_nodes_pre_trim": 765,
+          "t_trim": 0,
+          "n_nodes_post_trim": 765,
+          "t_extractor": 1,
+          "rebuilt_ntk_cost": 5.44444,
+          "ntk_size": 8,
+          "t_compile": 0,
+          "t_cost": 14.0,
+          "num_cells": 10,
+          "num_instr": 14,
+          "validation_success": 1
+        }
+      },
+      "t_total": 11,
+      "stdout": "RESULTS\t2\t7\t3\t2\t2\t765\t0\t765\t1\t5.44444\t8\t0\t14\t10\t14\t1\n",
+      "stderr": "preoptimize done\nrewriting to size 100\nRewriting done! Report: Runner report\n=============\n  Stop reason: NodeLimit(1013)\n  Iterations: 6\n  Egraph size: 765 nodes, 142 classes, 1025 memo\n  Rebuilds: 24\n  Total time: 0.00144945\n    Search:  (0.58) 0.000835651\n    Apply:   (0.33) 0.000473806\n    Rebuild: (0.10) 0.000139822\n\nTrimmed to size 765\ntransforming\nextracting\nrebuilt network with total cost 5.444444444444445, size 7\nt-extractor: 1\n=== final program:\n// copy D[1] !-> DCC[0]\nRC(D[1]) -> !DCC[0]\n\n// optimized copy from D[2] to T[1] (inverted: false)\nRC(D[2]) -> T[1]\n\n// optimized copy from D[0] to T[3] (inverted: false)\nRC(D[0]) -> T[0], T[3]\n\n// compute candidate Id(6)\nTRA(DCC[0], T[1], T[3]) -> D[3]\n\n// copy D[1] -> T[1]\nRC(D[1]) -> T[1]\n\n// copy D[2] -> T[2]\nRC(D[2]) -> T[2]\n\n// compute candidate Id(3)\nTRA(T[0], T[1], T[2]) -> !DCC[1]\n\n// copy D[0] -> T[0]\nRC(D[0]) -> T[0]\n\n// copy D[1] -> T[2]\nRC(D[1]) -> T[2]\n\n// compute candidate Id(4)\nTRA(DCC[1], T[0], T[2])\n\n// copy T[1] !-> DCC[1]\nRC(T[1]) -> !DCC[1]\n\n// copy D[2] -> T[0]\nRC(D[2]) -> T[0]\n\n// compute candidate Id(5)\nTRA(DCC[1], T[0], T[2])\n\n// copy DCC[1] !-> D[2]\nRC_INV(DCC[1]) -> D[2]\n\n\ndone\n"
+    }
+  },
+  {
+    "benchmark": {
+      "benchmark": "fs",
+      "arch": "simdram",
+      "mode": "greedy",
+      "candidate_selection": "all",
+      "rewriting_mode": "compiling",
+      "rewriting_size_factor": 100
+    },
+    "result": {
+      "result": {
+        "Ok": {
+          "t_preopt": 2,
+          "n_nodes": 7,
+          "n_inputs": 3,
+          "n_outputs": 2,
+          "t_runner": 2,
+          "n_nodes_pre_trim": 765,
+          "t_trim": 0,
+          "n_nodes_post_trim": 370,
+          "t_extractor": 472,
+          "rebuilt_ntk_cost": 0.0,
+          "ntk_size": 8,
+          "t_compile": 0,
+          "t_cost": 14.0,
+          "num_cells": 10,
+          "num_instr": 14,
+          "validation_success": 1
+        }
+      },
+      "t_total": 483,
+      "stdout": "RESULTS\t2\t7\t3\t2\t2\t765\t0\t370\t472\t0\t8\t0\t14\t10\t14\t1\n",
+      "stderr": "preoptimize done\nrewriting to size 100\nRewriting done! Report: Runner report\n=============\n  Stop reason: NodeLimit(1013)\n  Iterations: 6\n  Egraph size: 765 nodes, 142 classes, 1025 memo\n  Rebuilds: 24\n  Total time: 0.001514589\n    Search:  (0.59) 0.000888739\n    Apply:   (0.32) 0.000488906\n    Rebuild: (0.09) 0.000136761\n\nremoved 395 nodes\nTrimmed to size 370\nt-extractor: 472\n=== final program:\n// copy D[1] !-> DCC[0]\nRC(D[1]) -> !DCC[0]\n\n// optimized copy from D[2] to T[1] (inverted: false)\nRC(D[2]) -> T[1]\n\n// optimized copy from D[0] to T[3] (inverted: false)\nRC(D[0]) -> T[0], T[3]\n\n// compute candidate Id(6)\nTRA(DCC[0], T[1], T[3]) -> D[3]\n\n// copy D[1] -> T[1]\nRC(D[1]) -> T[1]\n\n// optimized copy from D[2] to T[2] (inverted: false)\nRC(D[2]) -> T[2]\n\n// compute candidate Id(3)\nTRA(T[0], T[1], T[2]) -> !DCC[1]\n\n// copy D[1] -> T[0]\nRC(D[1]) -> T[0]\n\n// copy D[0] -> T[2]\nRC(D[0]) -> T[2]\n\n// compute candidate Id(4)\nTRA(DCC[1], T[0], T[2])\n\n// copy DCC[1] !-> T[0]\nRC_INV(DCC[1]) -> T[0]\n\n// optimized copy from D[2] to DCC[0] (inverted: false)\nRC(D[2]) -> DCC[0]\n\n// copy DCC[0] !-> T[2]\nRC_INV(DCC[0]) -> T[2]\n\n// compute candidate Id(5)\nTRA(T[0], T[1], T[2]) -> D[2]\n\n\ndone\n"
+    }
+  },
+  {
+    "benchmark": {
+      "benchmark": "fs",
+      "arch": "simdram",
+      "mode": "exhaustive",
+      "candidate_selection": "all",
+      "rewriting_mode": "none",
+      "rewriting_size_factor": 100
+    },
+    "result": {
+      "result": {
+        "Ok": {
+          "t_preopt": 1,
+          "n_nodes": 7,
+          "n_inputs": 3,
+          "n_outputs": 2,
+          "t_runner": 0,
+          "n_nodes_pre_trim": 10,
+          "t_trim": 0,
+          "n_nodes_post_trim": 10,
+          "t_extractor": 0,
+          "rebuilt_ntk_cost": 0.0,
+          "ntk_size": 7,
+          "t_compile": 10,
+          "t_cost": 10.0,
+          "num_cells": 9,
+          "num_instr": 10,
+          "validation_success": 1
+        }
+      },
+      "t_total": 18,
+      "stdout": "RESULTS\t1\t7\t3\t2\t0\t10\t0\t10\t0\t0\t7\t10\t10\t9\t10\t1\n",
+      "stderr": "preoptimize done\nrewriting to size 100\nTrimmed to size 10\nt-extractor: 0\n=== final program:\n// optimized copy from D[1] to DCC[0] (inverted: true)\nRC(D[1]) -> !DCC[0], T[0]\n\n// optimized copy from D[0] to T[1] (inverted: false)\nRC(D[0]) -> T[1]\n\n// optimized copy from D[2] to T[3] (inverted: false)\nRC(D[2]) -> T[2], T[3]\n\n// compute candidate Id(3)\nTRA(DCC[0], T[1], T[3]) -> D[2]\n\n// copy D[0] -> DCC[1]\nRC(D[0]) -> DCC[1]\n\n// compute candidate Id(4)\nTRA(DCC[1], T[0], T[2])\n\n// copy D[1] -> T[1]\nRC(D[1]) -> T[1]\n\n// copy DCC[1] !-> T[3]\nRC_INV(DCC[1]) -> T[3]\n\n// compute candidate Id(5)\nTRA(DCC[0], T[1], T[3])\n\n// copy DCC[0] !-> D[1]\nRC_INV(DCC[0]) -> D[1]\n\n\ndone\n"
+    }
+  },
+  {
+    "benchmark": {
+      "benchmark": "fa",
+      "arch": "simdram",
+      "mode": "greedy",
+      "candidate_selection": "all",
+      "rewriting_mode": "greedy",
+      "rewriting_size_factor": 100
+    },
+    "result": {
+      "result": {
+        "Ok": {
+          "t_preopt": 2,
+          "n_nodes": 7,
+          "n_inputs": 3,
+          "n_outputs": 2,
+          "t_runner": 2,
+          "n_nodes_pre_trim": 817,
+          "t_trim": 0,
+          "n_nodes_post_trim": 817,
+          "t_extractor": 0,
+          "rebuilt_ntk_cost": 3.0,
+          "ntk_size": 7,
+          "t_compile": 0,
+          "t_cost": 10.0,
+          "num_cells": 8,
+          "num_instr": 10,
+          "validation_success": 1
+        }
+      },
+      "t_total": 11,
+      "stdout": "RESULTS\t2\t7\t3\t2\t2\t817\t0\t817\t0\t3\t7\t0\t10\t8\t10\t1\n",
+      "stderr": "preoptimize done\nrewriting to size 100\nRewriting done! Report: Runner report\n=============\n  Stop reason: NodeLimit(1022)\n  Iterations: 6\n  Egraph size: 817 nodes, 188 classes, 1022 memo\n  Rebuilds: 15\n  Total time: 0.001970645\n    Search:  (0.71) 0.0014074699999999999\n    Apply:   (0.23) 0.000445116\n    Rebuild: (0.06) 0.000117809\n\nTrimmed to size 817\ntransforming\nextracting\nrebuilt network with total cost 3, size 6\nt-extractor: 0\n=== final program:\n// optimized copy from D[0] to T[0] (inverted: false)\nRC(D[0]) -> T[0], T[3]\n\n// copy D[1] -> T[1]\nRC(D[1]) -> T[1]\n\n// copy D[2] -> T[2]\nRC(D[2]) -> T[2]\n\n// compute candidate Id(3)\nTRA(T[0], T[1], T[2]) -> !DCC[0]\n\n// copy D[2] -> T[1]\nRC(D[2]) -> T[1]\n\n// compute candidate Id(4)\nTRA(DCC[0], T[1], T[3])\n\n// copy T[2] !-> DCC[0]\nRC(T[2]) -> !DCC[0]\n\n// copy D[1] -> T[1]\nRC(D[1]) -> T[1]\n\n// compute candidate Id(5)\nTRA(DCC[0], T[1], T[3]) -> D[1]\n\n// copy T[0] -> D[2]\nRC(T[0]) -> D[2]\n\n\ndone\n"
+    }
+  },
+  {
+    "benchmark": {
+      "benchmark": "fa",
+      "arch": "simdram",
+      "mode": "greedy",
+      "candidate_selection": "all",
+      "rewriting_mode": "compiling",
+      "rewriting_size_factor": 100
+    },
+    "result": {
+      "result": {
+        "Ok": {
+          "t_preopt": 2,
+          "n_nodes": 7,
+          "n_inputs": 3,
+          "n_outputs": 2,
+          "t_runner": 3,
+          "n_nodes_pre_trim": 817,
+          "t_trim": 0,
+          "n_nodes_post_trim": 490,
+          "t_extractor": 760,
+          "rebuilt_ntk_cost": 0.0,
+          "ntk_size": 7,
+          "t_compile": 0,
+          "t_cost": 10.0,
+          "num_cells": 8,
+          "num_instr": 10,
+          "validation_success": 1
+        }
+      },
+      "t_total": 770,
+      "stdout": "RESULTS\t2\t7\t3\t2\t3\t817\t0\t490\t760\t0\t7\t0\t10\t8\t10\t1\n",
+      "stderr": "preoptimize done\nrewriting to size 100\nRewriting done! Report: Runner report\n=============\n  Stop reason: NodeLimit(1022)\n  Iterations: 6\n  Egraph size: 817 nodes, 188 classes, 1022 memo\n  Rebuilds: 15\n  Total time: 0.002526696\n    Search:  (0.70) 0.0017671100000000001\n    Apply:   (0.24) 0.0006161360000000001\n    Rebuild: (0.06) 0.00014311899999999998\n\nremoved 327 nodes\nTrimmed to size 490\nt-extractor: 760\n=== final program:\n// optimized copy from D[0] to T[0] (inverted: false)\nRC(D[0]) -> T[0], T[3]\n\n// copy D[1] -> T[1]\nRC(D[1]) -> T[1]\n\n// copy D[2] -> T[2]\nRC(D[2]) -> T[2]\n\n// compute candidate Id(3)\nTRA(T[0], T[1], T[2]) -> !DCC[0]\n\n// copy D[2] -> T[1]\nRC(D[2]) -> T[1]\n\n// compute candidate Id(4)\nTRA(DCC[0], T[1], T[3])\n\n// copy T[2] !-> DCC[0]\nRC(T[2]) -> !DCC[0]\n\n// copy D[1] -> T[1]\nRC(D[1]) -> T[1]\n\n// compute candidate Id(5)\nTRA(DCC[0], T[1], T[3]) -> D[1]\n\n// copy T[0] -> D[2]\nRC(T[0]) -> D[2]\n\n\ndone\n"
+    }
+  },
+  {
+    "benchmark": {
+      "benchmark": "fs",
+      "arch": "simdram",
+      "mode": "greedy",
+      "candidate_selection": "all",
+      "rewriting_mode": "lp",
+      "rewriting_size_factor": 100
+    },
+    "result": {
+      "result": {
+        "Ok": {
+          "t_preopt": 1,
+          "n_nodes": 7,
+          "n_inputs": 3,
+          "n_outputs": 2,
+          "t_runner": 2,
+          "n_nodes_pre_trim": 765,
+          "t_trim": 0,
+          "n_nodes_post_trim": 765,
+          "t_extractor": 812,
+          "rebuilt_ntk_cost": 4.44444,
+          "ntk_size": 7,
+          "t_compile": 0,
+          "t_cost": 11.0,
+          "num_cells": 9,
+          "num_instr": 11,
+          "validation_success": 1
+        }
+      },
+      "t_total": 823,
+      "stdout": "Welcome to the CBC MILP Solver \nVersion: 2.10.4 \nBuild Date: Jan 31 2020 \n\ncommand line - Cbc_C_Interface -solve -quit (default strategy 1)\nContinuous objective value is 2.31092 - 0.02 seconds\nCgl0004I processed model has 2317 rows, 1609 columns (1609 integer (1609 of which binary)) and 5458 elements\nCutoff increment increased from 1e-05 to 0.111011\nCbc0038I Initial state - 294 integers unsatisfied sum - 4.51754\nCbc0038I Pass   1: suminf.    4.50538 (316) obj. 2.31691 iterations 103\nCbc0038I Pass   2: suminf.    3.50000 (7) obj. 11.3889 iterations 353\nCbc0038I Pass   3: suminf.    2.27941 (155) obj. 10.9542 iterations 214\nCbc0038I Pass   4: suminf.    0.00000 (0) obj. 20.8889 iterations 398\nCbc0038I Solution found of 20.8889\nCbc0038I Rounding solution of 8.88889 is better than previous of 20.8889\n\nCbc0038I Before mini branch and bound, 1264 integers at bound fixed and 0 continuous\nCbc0038I Full problem 2317 rows 1609 columns, reduced to 519 rows 344 columns\nCbc0038I Mini branch and bound improved solution from 8.88889 to 4.44444 (0.21 seconds)\nCbc0038I Round again with cutoff of 4.13118\nCbc0038I Pass   5: suminf.    4.50538 (316) obj. 2.31691 iterations 0\nCbc0038I Pass   6: suminf.    7.62484 (34) obj. 4.13118 iterations 243\nCbc0038I Pass   7: suminf.    5.79125 (45) obj. 4.13118 iterations 519\nCbc0038I Pass   8: suminf.    3.34677 (388) obj. 3.53226 iterations 539\nCbc0038I Pass   9: suminf.    2.71795 (59) obj. 3.7094 iterations 294\nCbc0038I Pass  10: suminf.    2.34677 (291) obj. 3.53226 iterations 210\nCbc0038I Pass  11: suminf.    3.39521 (24) obj. 4.13118 iterations 332\nCbc0038I Pass  12: suminf.    2.33333 (182) obj. 3.54558 iterations 318\nCbc0038I Pass  13: suminf.    3.89203 (31) obj. 4.13118 iterations 322\nCbc0038I Pass  14: suminf.    3.23705 (16) obj. 4.13118 iterations 282\nCbc0038I Pass  15: suminf.    1.79414 (14) obj. 4.13118 iterations 153\nCbc0038I Pass  16: suminf.    2.19284 (7) obj. 4.13118 iterations 82\nCbc0038I Pass  17: suminf.    1.79414 (14) obj. 4.13118 iterations 24\nCbc0038I Pass  18: suminf.    4.13678 (14) obj. 4.13118 iterations 54\nCbc0038I Pass  19: suminf.    1.79414 (14) obj. 4.13118 iterations 28\nCbc0038I Pass  20: suminf.    1.79414 (14) obj. 4.13118 iterations 0\nCbc0038I Pass  21: suminf.    2.19284 (7) obj. 4.13118 iterations 275\nCbc0038I Pass  22: suminf.    1.79414 (14) obj. 4.13118 iterations 16\nCbc0038I Pass  23: suminf.    1.79414 (14) obj. 4.13118 iterations 248\nCbc0038I Pass  24: suminf.    4.19397 (11) obj. 4.13118 iterations 211\nCbc0038I Pass  25: suminf.    1.79414 (14) obj. 4.13118 iterations 281\nCbc0038I Pass  26: suminf.    1.79414 (14) obj. 4.13118 iterations 0\nCbc0038I Pass  27: suminf.    1.79414 (14) obj. 4.13118 iterations 260\nCbc0038I Pass  28: suminf.    1.79414 (14) obj. 4.13118 iterations 1\nCbc0038I Pass  29: suminf.    2.19284 (7) obj. 4.13118 iterations 39\nCbc0038I Pass  30: suminf.    2.19284 (7) obj. 4.13118 iterations 174\nCbc0038I Pass  31: suminf.    1.79414 (14) obj. 4.13118 iterations 143\nCbc0038I Pass  32: suminf.    2.19284 (7) obj. 4.13118 iterations 76\nCbc0038I Pass  33: suminf.    1.79414 (14) obj. 4.13118 iterations 25\nCbc0038I Pass  34: suminf.    1.79414 (14) obj. 4.13118 iterations 137\nCbc0038I No solution found this major pass\nCbc0038I Before mini branch and bound, 1140 integers at bound fixed and 0 continuous\nCbc0038I Full problem 2317 rows 1609 columns, reduced to 645 rows 467 columns\nCbc0038I Mini branch and bound did not improve solution (0.52 seconds)\nCbc0038I After 0.52 seconds - Feasibility pump exiting with objective of 4.44444 - took 0.49 seconds\nCbc0012I Integer solution of 4.4444444 found by feasibility pump after 0 iterations and 0 nodes (0.52 seconds)\nCbc0038I Full problem 2317 rows 1609 columns, reduced to 435 rows 280 columns\nCbc0031I 14 added rows had average density of 282.14286\nCbc0013I At root node, 14 cuts changed objective from 2.3109162 to 4.2104266 in 15 passes\nCbc0014I Cut generator 0 (Probing) - 11 row cuts average 13.3 elements, 56 column cuts (56 active)  in 0.029 seconds - new frequency is 1\nCbc0014I Cut generator 1 (Gomory) - 7 row cuts average 273.1 elements, 0 column cuts (0 active)  in 0.040 seconds - new frequency is 1\nCbc0014I Cut generator 2 (Knapsack) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.005 seconds - new frequency is -100\nCbc0014I Cut generator 3 (Clique) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.002 seconds - new frequency is -100\nCbc0014I Cut generator 4 (MixedIntegerRounding2) - 8 row cuts average 737.6 elements, 0 column cuts (0 active)  in 0.010 seconds - new frequency is 1\nCbc0014I Cut generator 5 (FlowCover) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.001 seconds - new frequency is -100\nCbc0014I Cut generator 7 (ZeroHalf) - 53 row cuts average 112.5 elements, 0 column cuts (0 active)  in 0.088 seconds - new frequency is 1\nCbc0001I Search completed - best objective 4.444444444444445, took 982 iterations and 0 nodes (0.78 seconds)\nCbc0032I Strong branching done 2 times (137 iterations), fathomed 1 nodes and fixed 0 variables\nCbc0035I Maximum depth 0, 125 variables fixed on reduced cost\nCuts at root node changed objective from 2.31092 to 4.44438\nProbing was tried 15 times and created 67 cuts of which 0 were active after adding rounds of cuts (0.029 seconds)\nGomory was tried 15 times and created 7 cuts of which 0 were active after adding rounds of cuts (0.040 seconds)\nKnapsack was tried 15 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.005 seconds)\nClique was tried 15 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.002 seconds)\nMixedIntegerRounding2 was tried 15 times and created 8 cuts of which 0 were active after adding rounds of cuts (0.010 seconds)\nFlowCover was tried 15 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.001 seconds)\nTwoMirCuts was tried 1 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.002 seconds)\nZeroHalf was tried 15 times and created 53 cuts of which 0 were active after adding rounds of cuts (0.088 seconds)\n\nResult - Optimal solution found\n\nObjective value:                4.44444444\nEnumerated nodes:               0\nTotal iterations:               982\nTime (CPU seconds):             0.78\nTime (Wallclock seconds):       0.81\n\nTotal time (CPU seconds):       0.78   (Wallclock seconds):       0.81\n\nRESULTS\t1\t7\t3\t2\t2\t765\t0\t765\t812\t4.44444\t7\t0\t11\t9\t11\t1\n",
+      "stderr": "preoptimize done\nrewriting to size 100\nRewriting done! Report: Runner report\n=============\n  Stop reason: NodeLimit(1013)\n  Iterations: 6\n  Egraph size: 765 nodes, 142 classes, 1025 memo\n  Rebuilds: 24\n  Total time: 0.001641329\n    Search:  (0.58) 0.0009527279999999999\n    Apply:   (0.33) 0.000544286\n    Rebuild: (0.09) 0.000144065\n\nTrimmed to size 765\ntransforming\nextracting\n[/home/niklas/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egg-0.10.0/src/lp_extract.rs:140:9] max_order = 18690.0\nrebuilt network with total cost 4.444444444444445, size 6\nt-extractor: 812\n=== final program:\n// optimized copy from D[1] to DCC[0] (inverted: true)\nRC(D[1]) -> !DCC[0]\n\n// optimized copy from D[2] to T[1] (inverted: false)\nRC(D[2]) -> T[1]\n\n// optimized copy from D[0] to T[3] (inverted: false)\nRC(D[0]) -> T[2], T[3]\n\n// compute candidate Id(3)\nTRA(DCC[0], T[1], T[3])\n\n// copy D[2] -> T[0]\nRC(D[2]) -> T[0]\n\n// copy DCC[0] !-> T[1]\nRC_INV(DCC[0]) -> T[1]\n\n// compute candidate Id(4)\nTRA(T[0], T[1], T[2])\n\n// copy D[1] !-> DCC[1]\nRC(D[1]) -> !DCC[1]\n\n// copy DCC[0] !-> T[2]\nRC_INV(DCC[0]) -> T[2]\n\n// compute candidate Id(5)\nTRA(DCC[1], T[0], T[2]) -> D[1]\n\n// copy T[3] -> D[2]\nRC(T[3]) -> D[2]\n\n\ndone\n"
+    }
+  },
+  {
+    "benchmark": {
+      "benchmark": "fa",
+      "arch": "simdram",
+      "mode": "exhaustive",
+      "candidate_selection": "all",
+      "rewriting_mode": "none",
+      "rewriting_size_factor": 100
+    },
+    "result": {
+      "result": {
+        "Ok": {
+          "t_preopt": 2,
+          "n_nodes": 7,
+          "n_inputs": 3,
+          "n_outputs": 2,
+          "t_runner": 0,
+          "n_nodes_pre_trim": 9,
+          "t_trim": 0,
+          "n_nodes_post_trim": 9,
+          "t_extractor": 0,
+          "rebuilt_ntk_cost": 0.0,
+          "ntk_size": 7,
+          "t_compile": 10,
+          "t_cost": 9.0,
+          "num_cells": 8,
+          "num_instr": 9,
+          "validation_success": 1
+        }
+      },
+      "t_total": 17,
+      "stdout": "RESULTS\t2\t7\t3\t2\t0\t9\t0\t9\t0\t0\t7\t10\t9\t8\t9\t1\n",
+      "stderr": "preoptimize done\nrewriting to size 100\nTrimmed to size 9\nt-extractor: 0\n=== final program:\n// copy D[0] -> T[0]\nRC(D[0]) -> T[0]\n\n// optimized copy from D[1] to T[1] (inverted: false)\nRC(D[1]) -> !DCC[1], T[1]\n\n// optimized copy from D[2] to T[3] (inverted: false)\nRC(D[2]) -> T[2], T[3]\n\n// compute candidate Id(3)\nTRA(T[0], T[1], T[3]) -> D[2]\n\n// copy D[0] -> T[0]\nRC(D[0]) -> T[0]\n\n// compute candidate Id(4)\nTRA(DCC[1], T[0], T[2])\n\n// copy T[1] !-> DCC[1]\nRC(T[1]) -> !DCC[1]\n\n// copy D[1] -> T[0]\nRC(D[1]) -> T[0]\n\n// compute candidate Id(5)\nTRA(DCC[1], T[0], T[2]) -> D[1]\n\n\ndone\n"
+    }
+  },
+  {
+    "benchmark": {
+      "benchmark": "mux",
+      "arch": "simdram",
+      "mode": "greedy",
+      "candidate_selection": "all",
+      "rewriting_mode": "compiling",
+      "rewriting_size_factor": 100
+    },
+    "result": {
+      "result": {
+        "Ok": {
+          "t_preopt": 1,
+          "n_nodes": 7,
+          "n_inputs": 3,
+          "n_outputs": 1,
+          "t_runner": 2,
+          "n_nodes_pre_trim": 920,
+          "t_trim": 0,
+          "n_nodes_post_trim": 580,
+          "t_extractor": 1273,
+          "rebuilt_ntk_cost": 0.0,
+          "ntk_size": 7,
+          "t_compile": 0,
+          "t_cost": 8.0,
+          "num_cells": 10,
+          "num_instr": 8,
+          "validation_success": 1
+        }
+      },
+      "t_total": 1283,
+      "stdout": "RESULTS\t1\t7\t3\t1\t2\t920\t0\t580\t1273\t0\t7\t0\t8\t10\t8\t1\n",
+      "stderr": "preoptimize done\nrewriting to size 100\nRewriting done! Report: Runner report\n=============\n  Stop reason: NodeLimit(1060)\n  Iterations: 6\n  Egraph size: 920 nodes, 232 classes, 1060 memo\n  Rebuilds: 5\n  Total time: 0.0017669930000000001\n    Search:  (0.66) 0.001159206\n    Apply:   (0.28) 0.000495175\n    Rebuild: (0.06) 0.000112392\n\nremoved 340 nodes\nTrimmed to size 580\nt-extractor: 1273\n=== final program:\n// copy D[0] -> T[0]\nRC(D[0]) -> T[0]\n\n// optimized copy from D[2] to T[1] (inverted: false)\nRC(D[2]) -> !DCC[1], T[1]\n\n// copy false !-> T[2]\nRC(true) -> T[2]\n\n// compute candidate Id(4)\nTRA(T[0], T[1], T[2])\n\n// copy false -> T[1]\nRC(false) -> T[1]\n\n// copy D[1] -> T[3]\nRC(D[1]) -> T[3]\n\n// compute candidate Id(5)\nTRA(T[0], T[1], T[3])\n\n// compute candidate Id(6)\nTRA(DCC[1], T[0], T[2]) -> D[2]\n\n\ndone\n"
+    }
+  },
+  {
+    "benchmark": {
+      "benchmark": "mux",
+      "arch": "simdram",
+      "mode": "greedy",
+      "candidate_selection": "all",
+      "rewriting_mode": "lp",
+      "rewriting_size_factor": 100
+    },
+    "result": {
+      "result": {
+        "Ok": {
+          "t_preopt": 1,
+          "n_nodes": 7,
+          "n_inputs": 3,
+          "n_outputs": 1,
+          "t_runner": 2,
+          "n_nodes_pre_trim": 920,
+          "t_trim": 0,
+          "n_nodes_post_trim": 920,
+          "t_extractor": 1925,
+          "rebuilt_ntk_cost": 3.0,
+          "ntk_size": 7,
+          "t_compile": 0,
+          "t_cost": 10.0,
+          "num_cells": 9,
+          "num_instr": 10,
+          "validation_success": 1
+        }
+      },
+      "t_total": 1937,
+      "stdout": "Welcome to the CBC MILP Solver \nVersion: 2.10.4 \nBuild Date: Jan 31 2020 \n\ncommand line - Cbc_C_Interface -solve -quit (default strategy 1)\nContinuous objective value is 1.1129 - 0.02 seconds\nCgl0004I processed model has 2242 rows, 1628 columns (1628 integer (1628 of which binary)) and 5380 elements\nCutoff increment increased from 1e-05 to 0.111011\nCbc0038I Initial state - 157 integers unsatisfied sum - 2.53226\nCbc0038I Pass   1: suminf.    2.48193 (206) obj. 1.14859 iterations 156\nCbc0038I Pass   2: suminf.    8.00000 (16) obj. 16.7222 iterations 504\nCbc0038I Pass   3: suminf.    2.16667 (13) obj. 16.2407 iterations 36\nCbc0038I Pass   4: suminf.    2.16667 (13) obj. 16.2407 iterations 4\nCbc0038I Pass   5: suminf.    0.00000 (0) obj. 22.4444 iterations 23\nCbc0038I Solution found of 22.4444\nCbc0038I Rounding solution of 7.44444 is better than previous of 22.4444\n\nCbc0038I Before mini branch and bound, 1386 integers at bound fixed and 0 continuous\nCbc0038I Full problem 2242 rows 1628 columns, reduced to 347 rows 239 columns\nCbc0038I Mini branch and bound improved solution from 7.44444 to 3 (0.09 seconds)\nCbc0038I Round again with cutoff of 2.71138\nCbc0038I Pass   6: suminf.    2.48193 (206) obj. 1.14859 iterations 0\nCbc0038I Pass   7: suminf.    4.42857 (39) obj. 1.81746 iterations 357\nCbc0038I Pass   8: suminf.    7.48931 (89) obj. 2.71138 iterations 413\nCbc0038I Pass   9: suminf.    5.19931 (121) obj. 2.71138 iterations 451\nCbc0038I Pass  10: suminf.    2.44578 (203) obj. 2.13655 iterations 498\nCbc0038I Pass  11: suminf.    4.11922 (52) obj. 2.71138 iterations 412\nCbc0038I Pass  12: suminf.    4.26397 (35) obj. 2.71138 iterations 258\nCbc0038I Pass  13: suminf.    2.38506 (85) obj. 2.11175 iterations 337\nCbc0038I Pass  14: suminf.    3.63929 (27) obj. 2.71138 iterations 331\nCbc0038I Pass  15: suminf.    4.13414 (14) obj. 2.71138 iterations 466\nCbc0038I Pass  16: suminf.    4.86586 (20) obj. 2.71138 iterations 261\nCbc0038I Pass  17: suminf.    2.48193 (206) obj. 2.14859 iterations 437\nCbc0038I Pass  18: suminf.    3.97598 (35) obj. 2.71138 iterations 340\nCbc0038I Pass  19: suminf.    4.57027 (79) obj. 2.71138 iterations 447\nCbc0038I Pass  20: suminf.    4.61495 (55) obj. 2.71138 iterations 409\nCbc0038I Pass  21: suminf.    2.48193 (206) obj. 2.14859 iterations 511\nCbc0038I Pass  22: suminf.    4.01219 (30) obj. 2.71138 iterations 310\nCbc0038I Pass  23: suminf.    3.97697 (14) obj. 2.71138 iterations 412\nCbc0038I Pass  24: suminf.    2.44578 (203) obj. 2.13655 iterations 417\nCbc0038I Pass  25: suminf.    4.82303 (36) obj. 2.71138 iterations 344\nCbc0038I Pass  26: suminf.    6.84145 (31) obj. 2.71138 iterations 421\nCbc0038I Pass  27: suminf.    3.44578 (276) obj. 2.13655 iterations 455\nCbc0038I Pass  28: suminf.    3.43846 (35) obj. 2.71138 iterations 458\nCbc0038I Pass  29: suminf.    2.38506 (85) obj. 2.11175 iterations 292\nCbc0038I Pass  30: suminf.    3.96030 (38) obj. 2.71138 iterations 323\nCbc0038I Pass  31: suminf.    3.76403 (48) obj. 2.71138 iterations 244\nCbc0038I Pass  32: suminf.    7.11326 (25) obj. 2.71138 iterations 360\nCbc0038I Pass  33: suminf.    2.48193 (206) obj. 1.14859 iterations 419\nCbc0038I Pass  34: suminf.    5.39973 (22) obj. 2.71138 iterations 439\nCbc0038I Pass  35: suminf.    2.46230 (223) obj. 2.13552 iterations 317\nCbc0038I No solution found this major pass\nCbc0038I Before mini branch and bound, 1146 integers at bound fixed and 0 continuous\nCbc0038I Full problem 2242 rows 1628 columns, reduced to 604 rows 466 columns\nCbc0038I Mini branch and bound did not improve solution (0.38 seconds)\nCbc0038I After 0.38 seconds - Feasibility pump exiting with objective of 3 - took 0.34 seconds\nCbc0012I Integer solution of 3 found by feasibility pump after 0 iterations and 0 nodes (0.38 seconds)\nCbc0038I Full problem 2242 rows 1628 columns, reduced to 222 rows 147 columns\nCbc0013I At root node, 0 cuts changed objective from 1.1129032 to 1.1129032 in 1 passes\nCbc0014I Cut generator 0 (Probing) - 0 row cuts average 0.0 elements, 144 column cuts (144 active)  in 0.003 seconds - new frequency is 1\nCbc0014I Cut generator 1 (Gomory) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.002 seconds - new frequency is -100\nCbc0014I Cut generator 2 (Knapsack) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.000 seconds - new frequency is -100\nCbc0014I Cut generator 3 (Clique) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.000 seconds - new frequency is -100\nCbc0014I Cut generator 4 (MixedIntegerRounding2) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.000 seconds - new frequency is -100\nCbc0014I Cut generator 5 (FlowCover) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.000 seconds - new frequency is -100\nCbc0010I After 0 nodes, 1 on tree, 3 best solution, best possible 1.1129032 (0.44 seconds)\nCbc0038I Full problem 2242 rows 1628 columns, reduced to 202 rows 141 columns\nCbc0038I Full problem 2242 rows 1628 columns, reduced to 1419 rows 1110 columns\nCbc0044I Reduced cost fixing - 1419 rows, 1110 columns - restarting search\nCbc0012I Integer solution of 3 found by Previous solution after 0 iterations and 0 nodes (0.94 seconds)\nCbc0038I Full problem 1419 rows 1110 columns, reduced to 222 rows 147 columns\nCbc0031I 8 added rows had average density of 204.375\nCbc0013I At root node, 8 cuts changed objective from 1.1129032 to 2 in 5 passes\nCbc0014I Cut generator 0 (Probing) - 0 row cuts average 0.0 elements, 92 column cuts (92 active)  in 0.005 seconds - new frequency is 1\nCbc0014I Cut generator 1 (Gomory) - 1 row cuts average 715.0 elements, 0 column cuts (0 active)  in 0.008 seconds - new frequency is -100\nCbc0014I Cut generator 2 (Knapsack) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.001 seconds - new frequency is -100\nCbc0014I Cut generator 3 (Clique) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.000 seconds - new frequency is -100\nCbc0014I Cut generator 4 (MixedIntegerRounding2) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.001 seconds - new frequency is -100\nCbc0014I Cut generator 5 (FlowCover) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.000 seconds - new frequency is -100\nCbc0014I Cut generator 6 (TwoMirCuts) - 13 row cuts average 148.4 elements, 0 column cuts (0 active)  in 0.006 seconds - new frequency is -100\nCbc0014I Cut generator 7 (ZeroHalf) - 15 row cuts average 131.9 elements, 0 column cuts (0 active)  in 0.005 seconds - new frequency is -100\nCbc0010I After 0 nodes, 1 on tree, 3 best solution, best possible 2 (1.02 seconds)\nCbc0038I Full problem 1419 rows 1110 columns, reduced to 293 rows 215 columns\nCbc0038I Full problem 1419 rows 1110 columns, reduced to 221 rows 171 columns\nCbc0010I After 100 nodes, 4 on tree, 3 best solution, best possible 2 (1.68 seconds)\nCbc0001I Search completed - best objective 3, took 9093 iterations and 110 nodes (1.82 seconds)\nCbc0032I Strong branching done 1150 times (22585 iterations), fathomed 6 nodes and fixed 29 variables\nCbc0035I Maximum depth 32, 372 variables fixed on reduced cost\nCbc0038I Probing was tried 69 times and created 1462 cuts of which 0 were active after adding rounds of cuts (0.024 seconds)\nCbc0038I Gomory was tried 5 times and created 1 cuts of which 0 were active after adding rounds of cuts (0.008 seconds)\nCbc0038I Knapsack was tried 5 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.001 seconds)\nCbc0038I Clique was tried 5 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)\nCbc0038I MixedIntegerRounding2 was tried 5 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.001 seconds)\nCbc0038I FlowCover was tried 5 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)\nCbc0038I TwoMirCuts was tried 5 times and created 13 cuts of which 0 were active after adding rounds of cuts (0.006 seconds)\nCbc0038I ZeroHalf was tried 5 times and created 15 cuts of which 0 were active after adding rounds of cuts (0.005 seconds)\nCbc0001I Search completed - best objective 3, took 11012 iterations and 160 nodes (1.82 seconds)\nCbc0032I Strong branching done 656 times (13470 iterations), fathomed 0 nodes and fixed 8 variables\nCbc0035I Maximum depth 24, 31 variables fixed on reduced cost\nCuts at root node changed objective from 1.1129 to 1.1129\nProbing was tried 11 times and created 144 cuts of which 0 were active after adding rounds of cuts (0.006 seconds)\nGomory was tried 1 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.002 seconds)\nKnapsack was tried 1 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)\nClique was tried 1 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)\nMixedIntegerRounding2 was tried 1 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)\nFlowCover was tried 1 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)\nTwoMirCuts was tried 1 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.002 seconds)\nZeroHalf was tried 1 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.003 seconds)\n\nResult - Optimal solution found\n\nObjective value:                3.00000000\nEnumerated nodes:               160\nTotal iterations:               11012\nTime (CPU seconds):             1.82\nTime (Wallclock seconds):       1.92\n\nTotal time (CPU seconds):       1.82   (Wallclock seconds):       1.92\n\nRESULTS\t1\t7\t3\t1\t2\t920\t0\t920\t1925\t3\t7\t0\t10\t9\t10\t1\n",
+      "stderr": "preoptimize done\nrewriting to size 100\nRewriting done! Report: Runner report\n=============\n  Stop reason: NodeLimit(1060)\n  Iterations: 6\n  Egraph size: 920 nodes, 232 classes, 1060 memo\n  Rebuilds: 5\n  Total time: 0.002001636\n    Search:  (0.65) 0.001293098\n    Apply:   (0.29) 0.000581137\n    Rebuild: (0.06) 0.00012711\n\nTrimmed to size 920\ntransforming\nextracting\n[/home/niklas/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egg-0.10.0/src/lp_extract.rs:140:9] max_order = 20640.0\nrebuilt network with total cost 3, size 7\nt-extractor: 1925\n=== final program:\n// copy false !-> T[0]\nRC(true) -> T[0]\n\n// optimized copy from D[2] to T[1] (inverted: false)\nRC(D[2]) -> T[1]\n\n// copy D[0] -> T[2]\nRC(D[0]) -> T[2]\n\n// compute candidate Id(4)\nTRA(T[0], T[1], T[2]) -> !DCC[0]\n\n// copy false !-> T[1]\nRC(true) -> T[1]\n\n// copy D[2] -> T[3]\nRC(D[2]) -> T[3]\n\n// compute candidate Id(5)\nTRA(DCC[0], T[1], T[3])\n\n// copy DCC[0] !-> T[1]\nRC_INV(DCC[0]) -> T[1]\n\n// copy D[1] -> T[2]\nRC(D[1]) -> T[2]\n\n// compute candidate Id(6)\nTRA(T[0], T[1], T[2]) -> D[1]\n\n\ndone\n"
+    }
+  },
+  {
+    "benchmark": {
+      "benchmark": "fa",
+      "arch": "simdram",
+      "mode": "greedy",
+      "candidate_selection": "all",
+      "rewriting_mode": "lp",
+      "rewriting_size_factor": 100
+    },
+    "result": {
+      "result": {
+        "Ok": {
+          "t_preopt": 2,
+          "n_nodes": 7,
+          "n_inputs": 3,
+          "n_outputs": 2,
+          "t_runner": 2,
+          "n_nodes_pre_trim": 817,
+          "t_trim": 0,
+          "n_nodes_post_trim": 817,
+          "t_extractor": 423,
+          "rebuilt_ntk_cost": 3.0,
+          "ntk_size": 7,
+          "t_compile": 0,
+          "t_cost": 10.0,
+          "num_cells": 9,
+          "num_instr": 10,
+          "validation_success": 1
+        }
+      },
+      "t_total": 435,
+      "stdout": "Welcome to the CBC MILP Solver \nVersion: 2.10.4 \nBuild Date: Jan 31 2020 \n\ncommand line - Cbc_C_Interface -solve -quit (default strategy 1)\nContinuous objective value is 2.10714 - 0.01 seconds\nCgl0004I processed model has 2072 rows, 1334 columns (1334 integer (1334 of which binary)) and 4884 elements\nCutoff increment increased from 1e-05 to 0.111011\nCbc0038I Initial state - 77 integers unsatisfied sum - 2.75\nCbc0038I Pass   1: suminf.    2.41176 (205) obj. 2.12157 iterations 135\nCbc0038I Pass   2: suminf.    0.00000 (0) obj. 10 iterations 288\nCbc0038I Solution found of 10\nCbc0038I Rounding solution of 4 is better than previous of 10\n\nCbc0038I Before mini branch and bound, 1113 integers at bound fixed and 0 continuous\nCbc0038I Full problem 2072 rows 1334 columns, reduced to 326 rows 214 columns\nCbc0038I Mini branch and bound improved solution from 4 to 3 (0.06 seconds)\nCbc0038I Round again with cutoff of 2.8108\nCbc0038I Reduced cost fixing fixed 78 variables on major pass 2\nCbc0038I Pass   3: suminf.    2.41176 (205) obj. 2.12157 iterations 0\nCbc0038I Pass   4: suminf.    3.41441 (12) obj. 2.8108 iterations 493\nCbc0038I Pass   5: suminf.    2.35714 (66) obj. 2.15873 iterations 391\nCbc0038I Pass   6: suminf.    1.32437 (7) obj. 2.8108 iterations 384\nCbc0038I Pass   7: suminf.    1.32437 (7) obj. 2.8108 iterations 40\nCbc0038I Pass   8: suminf.    1.32437 (7) obj. 2.8108 iterations 15\nCbc0038I Pass   9: suminf.    1.32437 (7) obj. 2.8108 iterations 8\nCbc0038I Pass  10: suminf.    1.32437 (7) obj. 2.8108 iterations 14\nCbc0038I Pass  11: suminf.    1.32437 (7) obj. 2.8108 iterations 9\nCbc0038I Pass  12: suminf.    1.32437 (7) obj. 2.8108 iterations 139\nCbc0038I Pass  13: suminf.    1.32437 (7) obj. 2.8108 iterations 126\nCbc0038I Pass  14: suminf.    1.32437 (7) obj. 2.8108 iterations 12\nCbc0038I Pass  15: suminf.    1.32437 (7) obj. 2.8108 iterations 6\nCbc0038I Pass  16: suminf.    1.32437 (7) obj. 2.8108 iterations 12\nCbc0038I Pass  17: suminf.    1.99171 (117) obj. 2.8108 iterations 309\nCbc0038I Pass  18: suminf.    1.32437 (7) obj. 2.8108 iterations 183\nCbc0038I Pass  19: suminf.    2.30819 (26) obj. 2.8108 iterations 320\nCbc0038I Pass  20: suminf.    1.32437 (7) obj. 2.8108 iterations 170\nCbc0038I Pass  21: suminf.    1.32437 (7) obj. 2.8108 iterations 14\nCbc0038I Pass  22: suminf.    1.32437 (7) obj. 2.8108 iterations 2\nCbc0038I Pass  23: suminf.    1.32437 (7) obj. 2.8108 iterations 8\nCbc0038I Pass  24: suminf.    1.32437 (7) obj. 2.8108 iterations 4\nCbc0038I Pass  25: suminf.    2.27035 (32) obj. 2.8108 iterations 203\nCbc0038I Pass  26: suminf.    1.32437 (7) obj. 2.8108 iterations 147\nCbc0038I Pass  27: suminf.    1.32437 (7) obj. 2.8108 iterations 7\nCbc0038I Pass  28: suminf.    1.32437 (7) obj. 2.8108 iterations 3\nCbc0038I Pass  29: suminf.    1.32437 (7) obj. 2.8108 iterations 7\nCbc0038I Pass  30: suminf.    4.91642 (60) obj. 2.8108 iterations 331\nCbc0038I Pass  31: suminf.    2.41176 (205) obj. 2.12157 iterations 308\nCbc0038I Pass  32: suminf.    3.99016 (14) obj. 2.8108 iterations 439\nCbc0038I No solution found this major pass\nCbc0038I Before mini branch and bound, 1057 integers at bound fixed and 0 continuous\nCbc0038I Full problem 2072 rows 1334 columns, reduced to 400 rows 273 columns\nCbc0038I Mini branch and bound did not improve solution (0.16 seconds)\nCbc0038I After 0.16 seconds - Feasibility pump exiting with objective of 3 - took 0.12 seconds\nCbc0012I Integer solution of 3 found by feasibility pump after 0 iterations and 0 nodes (0.16 seconds)\nCbc0038I Full problem 2072 rows 1334 columns, reduced to 103 rows 69 columns\nCbc0013I At root node, 0 cuts changed objective from 2.1071429 to 2.1071429 in 1 passes\nCbc0014I Cut generator 0 (Probing) - 0 row cuts average 0.0 elements, 72 column cuts (72 active)  in 0.001 seconds - new frequency is 1\nCbc0014I Cut generator 1 (Gomory) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.002 seconds - new frequency is -100\nCbc0014I Cut generator 2 (Knapsack) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.000 seconds - new frequency is -100\nCbc0014I Cut generator 3 (Clique) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.000 seconds - new frequency is -100\nCbc0014I Cut generator 4 (MixedIntegerRounding2) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.000 seconds - new frequency is -100\nCbc0014I Cut generator 5 (FlowCover) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.000 seconds - new frequency is -100\nCbc0010I After 0 nodes, 1 on tree, 3 best solution, best possible 2.122085 (0.20 seconds)\nCbc0001I Search completed - best objective 3, took 816 iterations and 14 nodes (0.39 seconds)\nCbc0032I Strong branching done 144 times (5779 iterations), fathomed 2 nodes and fixed 11 variables\nCbc0035I Maximum depth 6, 78 variables fixed on reduced cost\nCuts at root node changed objective from 2.10714 to 2.12209\nProbing was tried 10 times and created 293 cuts of which 0 were active after adding rounds of cuts (0.004 seconds)\nGomory was tried 1 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.002 seconds)\nKnapsack was tried 1 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)\nClique was tried 1 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)\nMixedIntegerRounding2 was tried 1 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)\nFlowCover was tried 1 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)\nTwoMirCuts was tried 1 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.001 seconds)\nZeroHalf was tried 1 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.001 seconds)\n\nResult - Optimal solution found\n\nObjective value:                3.00000000\nEnumerated nodes:               14\nTotal iterations:               816\nTime (CPU seconds):             0.40\nTime (Wallclock seconds):       0.42\n\nTotal time (CPU seconds):       0.40   (Wallclock seconds):       0.42\n\nRESULTS\t2\t7\t3\t2\t2\t817\t0\t817\t423\t3\t7\t0\t10\t9\t10\t1\n",
+      "stderr": "preoptimize done\nrewriting to size 100\nRewriting done! Report: Runner report\n=============\n  Stop reason: NodeLimit(1022)\n  Iterations: 6\n  Egraph size: 817 nodes, 188 classes, 1022 memo\n  Rebuilds: 15\n  Total time: 0.0020292360000000002\n    Search:  (0.72) 0.0014611490000000001\n    Apply:   (0.22) 0.000450734\n    Rebuild: (0.06) 0.00011720099999999999\n\nTrimmed to size 817\ntransforming\nextracting\n[/home/niklas/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/egg-0.10.0/src/lp_extract.rs:140:9] max_order = 18870.0\nrebuilt network with total cost 3, size 6\nt-extractor: 423\n=== final program:\n// copy D[0] -> T[0]\nRC(D[0]) -> T[0]\n\n// copy D[2] -> T[1]\nRC(D[2]) -> T[1]\n\n// optimized copy from D[1] to T[2] (inverted: false)\nRC(D[1]) -> T[2], T[3]\n\n// compute candidate Id(3)\nTRA(T[0], T[1], T[2]) -> !DCC[0]\n\n// copy D[0] -> T[1]\nRC(D[0]) -> T[1]\n\n// compute candidate Id(4)\nTRA(DCC[0], T[1], T[3])\n\n// copy T[2] !-> DCC[0]\nRC(T[2]) -> !DCC[0]\n\n// copy D[2] -> T[1]\nRC(D[2]) -> T[1]\n\n// compute candidate Id(5)\nTRA(DCC[0], T[1], T[3]) -> D[2]\n\n// copy T[0] -> D[3]\nRC(T[0]) -> D[3]\n\n\ndone\n"
+    }
+  },
+  {
+    "benchmark": {
+      "benchmark": "mux",
+      "arch": "simdram",
+      "mode": "greedy",
+      "candidate_selection": "all",
+      "rewriting_mode": "greedy",
+      "rewriting_size_factor": 100
+    },
+    "result": {
+      "result": {
+        "Ok": {
+          "t_preopt": 1,
+          "n_nodes": 7,
+          "n_inputs": 3,
+          "n_outputs": 1,
+          "t_runner": 2,
+          "n_nodes_pre_trim": 920,
+          "t_trim": 0,
+          "n_nodes_post_trim": 920,
+          "t_extractor": 1,
+          "rebuilt_ntk_cost": 3.0,
+          "ntk_size": 7,
+          "t_compile": 0,
+          "t_cost": 9.0,
+          "num_cells": 9,
+          "num_instr": 9,
+          "validation_success": 1
+        }
+      },
+      "t_total": 10,
+      "stdout": "RESULTS\t1\t7\t3\t1\t2\t920\t0\t920\t1\t3\t7\t0\t9\t9\t9\t1\n",
+      "stderr": "preoptimize done\nrewriting to size 100\nRewriting done! Report: Runner report\n=============\n  Stop reason: NodeLimit(1060)\n  Iterations: 6\n  Egraph size: 920 nodes, 232 classes, 1060 memo\n  Rebuilds: 5\n  Total time: 0.001760255\n    Search:  (0.65) 0.001147935\n    Apply:   (0.28) 0.000487604\n    Rebuild: (0.07) 0.000124494\n\nTrimmed to size 920\ntransforming\nextracting\nrebuilt network with total cost 3, size 7\nt-extractor: 1\n=== final program:\n// optimized copy from D[2] to T[0] (inverted: false)\nRC(D[2]) -> T[0], T[3]\n\n// copy D[0] -> T[1]\nRC(D[0]) -> T[1]\n\n// copy false !-> T[2]\nRC(true) -> T[2]\n\n// compute candidate Id(4)\nTRA(T[0], T[1], T[2]) -> !DCC[0]\n\n// copy false !-> T[1]\nRC(true) -> T[1]\n\n// compute candidate Id(5)\nTRA(DCC[0], T[1], T[3])\n\n// copy D[1] -> T[1]\nRC(D[1]) -> T[1]\n\n// copy DCC[0] !-> T[2]\nRC_INV(DCC[0]) -> T[2]\n\n// compute candidate Id(6)\nTRA(T[0], T[1], T[2]) -> D[1]\n\n\ndone\n"
+    }
+  }
+]

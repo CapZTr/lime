@@ -1,17 +1,28 @@
 [package]
 name = "lime-rs"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-eggmock = { path = "../../eggmock" }
-rustc-hash = "2.1.0"
-either = "1.13.0"
-smallvec = "1.14.0"
-ouroboros = "0.18.0"
+lime-macros = { workspace = true }
+lime-generic = { workspace = true }
+eggmock = { workspace = true }
+rustc-hash = { workspace = true }
+either = { workspace = true }
+smallvec = { workspace = true }
+ouroboros = { workspace = true }
+derive-where = { workspace = true }
+derive_more = { workspace = true }
+paste = { workspace = true }
+itertools = { workspace = true }
+blanket = { workspace = true }
+petgraph = { workspace = true }
+tracing = { workspace = true }
+test-log = { workspace = true }
+egg = { workspace = true }
 
 [build-dependencies]
-eggmock = { path = "../../eggmock" }
+eggmock = { workspace = true }

@@ -170,17 +170,15 @@ impl Optimization<'_, '_> {
 
                 if let Instruction::AAP(Address::Bitwise(BitwiseAddress::Single(operand)), target) =
                     candidate
-                {
-                    if target
+                    && target
                         .row_addresses(self.program.architecture)
                         .any(|addr| used_rows.contains(&addr.row()))
-                        && operands.contains(&operand)
-                    {
-                        instructions[i] = Instruction::AAP(address, target);
-                        instructions.remove(candidate_i);
-                        i += 1;
-                        continue 'outer;
-                    }
+                    && operands.contains(&operand)
+                {
+                    instructions[i] = Instruction::AAP(address, target);
+                    instructions.remove(candidate_i);
+                    i += 1;
+                    continue 'outer;
                 }
 
                 used_rows.extend(

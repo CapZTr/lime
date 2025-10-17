@@ -1,12 +1,12 @@
 use super::{Architecture, BitwiseOperand, SingleRowAddress};
-use eggmock::{Id, Mig, NetworkWithBackwardEdges, Signal};
+use eggmock::{Id, Mig, Network, Node, Signal};
 use rustc_hash::FxHashMap;
 use std::collections::hash_map::Entry;
 
 /// Equivalent to a DRAM row.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Row {
-    In(u64),
+    In(u32),
     Out(u64),
     Spill(u32),
     Const(bool),
@@ -32,10 +32,7 @@ pub struct Rows<'a> {
 
 impl<'a> Rows<'a> {
     /// Initializes the rows with the leaf values in the given network.
-    pub fn new(
-        ntk: &impl NetworkWithBackwardEdges<Node = Mig>,
-        architecture: &'a Architecture,
-    ) -> Self {
+    pub fn new(ntk: &Network<Mig>, architecture: &'a Architecture) -> Self {
         let mut rows = Rows {
             signals: FxHashMap::default(),
             rows: FxHashMap::default(),
@@ -46,17 +43,17 @@ impl<'a> Rows<'a> {
         rows
     }
 
-    fn add_leafs(&mut self, ntk: &impl NetworkWithBackwardEdges<Node = Mig>) {
-        let leafs = ntk.leafs();
-        self.rows.reserve(leafs.size_hint().0);
-        for id in leafs {
-            let node = ntk.node(id);
+    fn add_leafs(&mut self, ntk: &Network<Mig>) {
+        let leaves = ntk.leaves();
+        self.rows.reserve(leaves.len());
+        for id in leaves {
+            let node = ntk.node(*id);
             match node {
-                Mig::Input(i) => {
-                    self.set_empty_row_signal(Row::In(i), Signal::new(id, false));
+                Node::Input(i) => {
+                    self.set_empty_row_signal(Row::In(*i), Signal::new(*id, false));
                 }
-                Mig::False => {
-                    let signal = Signal::new(id, false);
+                Node::False => {
+                    let signal = Signal::new(*id, false);
                     self.set_empty_row_signal(Row::Const(false), signal);
                     self.set_empty_row_signal(Row::Const(true), signal.invert());
                 }

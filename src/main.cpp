@@ -1,37 +1,33 @@
-#include "ambit.h"
+#include "gp.h"
+#include "utils.h"
 
+#include <cmath>
+#include <mockturtle/algorithms/equivalence_checking.hpp>
+#include <mockturtle/algorithms/miter.hpp>
+#include <mockturtle/generators/arithmetic.hpp>
 #include <mockturtle/io/write_dot.hpp>
+#include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
+#include <vector>
 
 using namespace mockturtle;
 using namespace eggmock;
 
+using ntk_t = mig_network;
+
 int main()
 {
-  mig_network in;
-  const auto b_i = in.create_pi();
-  const auto b_i_next = in.create_pi();
-  const auto m = in.create_pi();
+  ntk_t in;
+  in.create_po( in.create_xor3( in.create_pi(), in.create_pi(), in.create_pi() ) );
+  preoptimize( in );
 
-  const auto O1 = in.create_and( m, b_i_next );
-  const auto O2 = in.create_and( in.create_not( m ), b_i );
-  const auto bi = in.create_or( O1, O2 );
-  in.create_po( bi );
+  const auto result = send_ntk( in, receiver( gp_compile_ambit( compiler_settings{
+                                        .rewriting = rewriting_strategy::none,
+                                        .validator = new_validator( in ),
+                                        .mode = compilation_mode::exhaustive,
+                                        .candidate_selection = candidate_selection_mode::all,
+                                    } ) ) );
 
-  write_dot( in, "in.dot" );
-
-  const auto settings = ambit_compiler_settings{
-      .print_program = true,
-      .verbose = true,
-      .preoptimize = true,
-      .rewrite = true,
-  };
-
-  auto [out, result] = ambit_rewrite( settings, in );
-  std::cout << "IC:" << result.instruction_count << std::endl;
-  std::cout << "t1:" << result.t_runner << std::endl;
-  std::cout << "t2:" << result.t_extractor << std::endl;
-  std::cout << "t3:" << result.t_compiler << std::endl;
-
-  write_dot( out, "out.dot" );
+  std::cout << "total cost: " << result.num_instr << std::endl;
+  std::cout << "total cells: " << result.num_cells << std::endl;
 }
