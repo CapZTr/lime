@@ -1,3 +1,7 @@
+[submodule "eggmock"]
+	path = eggmock
+	url = https://github.com/jungnitz/eggmock.git
+	branch = dev
 [submodule "mockturtle"]
 	path = mockturtle
-	url = https://github.com/lsils/mockturtle.git
+	url = https://github.com/lsils/mockturtle/tree/f2396ece21f7f17bb7f4de6c81a34343eab0a13b

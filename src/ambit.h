@@ -1,7 +1,7 @@
 #pragma once
 
-#include "eggmock.h"
 #include "utils.h"
+#include <eggmock.hpp>
 
 #include <mockturtle/networks/mig.hpp>
 
@@ -47,11 +47,11 @@ extern "C"
 
   void ambit_free_program_string(char* ptr);
 
-  eggmock::mig_receiver<ambit_compiler_statistics> ambit_compile_ffi(
+  eggmock::receiver_ffi<ambit_compiler_statistics> ambit_compile_ffi(
       ambit_compiler_settings_ffi settings );
-  eggmock::mig_receiver<ambit_compiler_statistics> ambit_rewrite_ffi(
+  eggmock::receiver_ffi<ambit_compiler_statistics> ambit_rewrite_ffi(
       ambit_compiler_settings_ffi settings,
-      eggmock::mig_receiver<void> receiver );
+      eggmock::receiver_ffi<void> receiver );
 }
 
 class ProgramString {
@@ -112,8 +112,8 @@ inline std::pair<mockturtle::mig_network, ambit_compiler_statistics> ambit_rewri
     preoptimize_mig( ntk );
   }
   mockturtle::mig_network out;
-  auto stat = eggmock::send_mig(
-      ntk, ambit_rewrite_ffi( settings, eggmock::receive_mig( out ) ) );
+  const auto stat = eggmock::send_ntk( ntk, eggmock::receiver(
+                                                ambit_rewrite_ffi( settings, eggmock::receive_into( out ) ) ) );
   program_out = ProgramString(const_cast<char*>(stat.program_str));
   stat.program_str = nullptr;
   return { out, stat };
@@ -138,19 +138,8 @@ inline ambit_compiler_statistics ambit_compile(
   {
     preoptimize_mig( ntk );
   }
-  mockturtle::mig_network out;
-  auto stat = eggmock::send_mig( ntk, ambit_compile_ffi( settings ) );
+  const auto stat = eggmock::send_ntk( ntk, eggmock::receiver( ambit_compile_ffi( settings ) ) );
   program_out = ProgramString(const_cast<char*>(stat.program_str));
   stat.program_str = nullptr;
   return stat;
-}
-
-inline ambit_compiler_statistics ambit_compile(
-    ambit_compiler_settings settings,
-    mockturtle::mig_network& ntk)
-{
-    ProgramString dummy;
-    auto stat = ambit_compile(settings, ntk, dummy);
-    stat.program_str = nullptr;
-    return stat;
 }

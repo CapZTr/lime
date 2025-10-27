@@ -1,0 +1,38 @@
+[workspace]
+resolver = "3"
+members = ["crates/*", "rs"]
+
+[workspace.dependencies]
+lime-generic-def = { path = "crates/generic-def" }
+lime-generic = { path = "crates/generic" }
+lime-macros = { path = "crates/macros" }
+lime-rs = { path = "rs" }
+eggmock = { path = "eggmock" }
+
+tokio = { version = "1.47.1", features = [ "process", "full"] }
+rustc-hash = "2.1.0"
+either = "1.13.0"
+smallvec = "1.14.0"
+ouroboros = "0.18.0"
+derive-where = "1.5.0"
+derive_more = { version = "2.0.1", features = ["full"] }
+paste = "1.0.15"
+strum = { version = "0.27.1", features = ["derive"] }
+itertools = "0.14.0"
+convert_case = "0.8.0"
+delegate = "0.13.3"
+blanket = "0.4.0"
+petgraph = "0.8.2"
+tracing = "0.1"
+test-log = { version = "0.2", default-features = false, features = ["trace"] }
+egg = { version = "0.10.0", features = ["lp"] }
+pathfinding = { version = "4.14.0" }
+ordered-float = { version = "5.0.0" }
+derive-syn-parse = { version = "0.2.0" }
+csv = "1.3.1"
+serde = { version = "1.0", features = [ "derive"] }
+anyhow = { version = "1.0"}
+serde_json = { version = "1.0"}
+
+[workspace.lints.rust]
+unused_extern_crates = "forbid"

@@ -1,0 +1,100 @@
+use crate::{BoolHint, func::EvaluationMethods};
+
+#[derive(Debug, Clone, Copy)]
+pub struct MajEval {
+    nums: [u8; 3],
+}
+
+impl MajEval {
+    pub fn new() -> Self {
+        Self { nums: [0, 0, 0] }
+    }
+}
+
+impl EvaluationMethods for MajEval {
+    fn hint(&self, arity: usize, target: bool) -> Option<BoolHint> {
+        let num_target = usize::from(self.nums[target as usize]);
+        let required_target = arity.div_ceil(2);
+        if num_target >= required_target {
+            return Some(BoolHint::Any);
+        }
+        let missing_values = required_target - num_target;
+        let leftover = arity - self.count();
+        if leftover < missing_values {
+            None
+        } else if missing_values == leftover {
+            Some(BoolHint::Require(target))
+        } else {
+            Some(BoolHint::Prefer(target))
+        }
+    }
+
+    fn hint_id(&self, arity: usize, inverted: bool) -> Option<BoolHint> {
+        if inverted || self.nums[2] != 0 {
+            return None;
+        }
+        if self.nums[0] == self.nums[1] {
+            Some(BoolHint::Any)
+        } else if arity == self.count() + 1 {
+            // next value is last value, and we do not have equal counts
+            // -> impossible
+            None
+        } else {
+            let leftover = arity - self.count() - 1;
+            // delta: number of min-values to reach equal counts
+            let (delta, min) = if self.nums[0] > self.nums[1] {
+                (self.nums[0] - self.nums[1], true)
+            } else {
+                (self.nums[1] - self.nums[0], false)
+            };
+            let delta = delta as usize;
+            if leftover < delta {
+                None
+            } else if leftover == delta {
+                Some(BoolHint::Require(min))
+            } else {
+                Some(BoolHint::Prefer(min))
+            }
+        }
+    }
+
+    fn id_inverted(&self) -> Option<bool> {
+        if self.nums[0] == self.nums[1] && self.nums[2] == 0 {
+            Some(false)
+        } else {
+            None
+        }
+    }
+
+    fn add(&mut self, value: bool) {
+        self.nums[value as usize] += 1
+    }
+
+    fn add_unknown(&mut self) {
+        self.nums[2] += 1;
+    }
+
+    fn evaluate(&self) -> Option<bool> {
+        if self.count() % 2 != 1 {
+            None
+        } else {
+            let value = self.nums[1] > self.nums[0];
+            let diff = self.nums[value as usize] - self.nums[!value as usize];
+            if diff <= self.nums[2] {
+                None
+            } else {
+                Some(value)
+            }
+        }
+    }
+
+    fn count(&self) -> usize {
+        self.nums.iter().sum::<u8>().into()
+    }
+}
+
+impl Default for MajEval {
+    fn default() -> Self {
+        Self::new()
+    }
+}

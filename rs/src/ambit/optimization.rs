@@ -3,7 +3,7 @@ use crate::ambit::program::{Address, BitwiseAddress, Instruction};
 use rustc_hash::FxHashSet;
 
 pub fn optimize(program: &mut Program) {
-    if program.instructions.len() == 0 {
+    if program.instructions.is_empty() {
         return;
     }
     let mut opt = Optimization { program };
@@ -170,17 +170,15 @@ impl Optimization<'_, '_> {
 
                 if let Instruction::AAP(Address::Bitwise(BitwiseAddress::Single(operand)), target) =
                     candidate
-                {
-                    if target
+                    && target
                         .row_addresses(self.program.architecture)
                         .any(|addr| used_rows.contains(&addr.row()))
-                        && operands.contains(&operand)
-                    {
-                        instructions[i] = Instruction::AAP(address, target);
-                        instructions.remove(candidate_i);
-                        i += 1;
-                        continue 'outer;
-                    }
+                    && operands.contains(&operand)
+                {
+                    instructions[i] = Instruction::AAP(address, target);
+                    instructions.remove(candidate_i);
+                    i += 1;
+                    continue 'outer;
                 }
 
                 used_rows.extend(

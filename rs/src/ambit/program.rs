@@ -1,11 +1,11 @@
 use super::{Architecture, BitwiseOperand, BitwiseRow, Row, Rows};
-use eggmock::{Id, Mig, NetworkWithBackwardEdges, Signal};
+use eggmock::{Id, Mig, Network, Signal};
 use std::fmt::{Display, Formatter};
 use std::ops::{Deref, DerefMut};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Address {
-    In(u64),
+    In(u32),
     Out(u64),
     Spill(u32),
     Const(bool),
@@ -14,7 +14,7 @@ pub enum Address {
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum SingleRowAddress {
-    In(u64),
+    In(u32),
     Out(u64),
     Spill(u32),
     Const(bool),
@@ -67,7 +67,7 @@ impl Instruction {
     pub fn used_addresses<'a>(
         &self,
         architecture: &'a Architecture,
-    ) -> impl Iterator<Item = SingleRowAddress> + 'a {
+    ) -> impl Iterator<Item = SingleRowAddress> + 'a + use<'a> {
         let from = match self {
             Instruction::AAP(from, _) => from,
             Instruction::AP(op) => op,
@@ -97,11 +97,10 @@ impl Instruction {
         &self,
         architecture: &'a Architecture,
     ) -> impl Iterator<Item = Row> + 'a {
-        let first = match self {
+        let first = *match self {
             Instruction::AP(a) => a,
             Instruction::AAP(a, _) => a,
-        }
-        .clone();
+        };
         let first = match first {
             Address::Bitwise(BitwiseAddress::Multiple(idx)) => {
                 architecture.multi_activations[idx].as_slice()
@@ -123,10 +122,7 @@ impl Instruction {
 }
 
 impl<'a> ProgramState<'a> {
-    pub fn new(
-        architecture: &'a Architecture,
-        network: &impl NetworkWithBackwardEdges<Node = Mig>,
-    ) -> Self {
+    pub fn new(architecture: &'a Architecture, network: &Network<Mig>) -> Self {
         Self {
             program: Program::new(architecture, Vec::new()),
             rows: Rows::new(network, architecture),
@@ -229,12 +225,12 @@ impl<'a> ProgramState<'a> {
     /// **ALWAYS** call this before inserting the actual instruction, otherwise the spill code will
     /// spill the wrong value
     fn set_signal(&mut self, address: SingleRowAddress, signal: Signal) {
-        if let Some(previous_signal) = self.rows.set_signal(address, signal) {
-            if !self.rows.contains_id(previous_signal.node_id()) {
-                let spill_id = self.rows.add_spill(previous_signal);
-                self.instructions
-                    .push(Instruction::AAP(address.into(), Address::Spill(spill_id)));
-            }
+        if let Some(previous_signal) = self.rows.set_signal(address, signal)
+            && !self.rows.contains_id(previous_signal.node_id())
+        {
+            let spill_id = self.rows.add_spill(previous_signal);
+            self.instructions
+                .push(Instruction::AAP(address.into(), Address::Spill(spill_id)));
         }
     }
 
@@ -242,7 +238,7 @@ impl<'a> ProgramState<'a> {
         self.rows.free_id_rows(id);
     }
 
-    pub fn rows(&self) -> &Rows {
+    pub fn rows(&self) -> &Rows<'_> {
         &self.rows
     }
 }
@@ -261,7 +257,7 @@ impl Address {
     pub fn row_addresses<'a>(
         &self,
         architecture: &'a Architecture,
-    ) -> impl Iterator<Item = SingleRowAddress> + 'a {
+    ) -> impl Iterator<Item = SingleRowAddress> + use<'a> {
         let single = self.as_single_row().into_iter();
         let multi = match self {
             Address::Bitwise(BitwiseAddress::Multiple(i)) => {
@@ -383,21 +379,21 @@ impl Display for Program<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let write_operand = |f: &mut Formatter<'_>, o: &BitwiseOperand| -> std::fmt::Result {
             match o {
-                BitwiseOperand::T(t) => write!(f, "T{}", t),
+                BitwiseOperand::T(t) => write!(f, "T{t}"),
                 BitwiseOperand::DCC { inverted, index } => {
                     if *inverted {
-                        write!(f, "~DCC{}", index)
+                        write!(f, "~DCC{index}")
                     } else {
-                        write!(f, "DCC{}", index)
+                        write!(f, "DCC{index}")
                     }
                 }
             }
         };
         let write_address = |f: &mut Formatter<'_>, a: &Address| -> std::fmt::Result {
             match a {
-                Address::In(i) => write!(f, "I{}", i),
-                Address::Out(i) => write!(f, "O{}", i),
-                Address::Spill(i) => write!(f, "S{}", i),
+                Address::In(i) => write!(f, "I{i}"),
+                Address::Out(i) => write!(f, "O{i}"),
+                Address::Spill(i) => write!(f, "S{i}"),
                 Address::Const(c) => write!(f, "C{}", if *c { "1" } else { "0" }),
                 Address::Bitwise(b) => match b {
                     BitwiseAddress::Single(o) => write_operand(f, o),

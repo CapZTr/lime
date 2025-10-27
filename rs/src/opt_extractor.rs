@@ -1,57 +1,70 @@
-use std::{fmt::Debug, ops::Index};
+use std::fmt::Debug;
 
 use eggmock::{
-    egg::{Analysis, EClass, EGraph, Id, Language},
-    EggIdToSignal, Network, NetworkLanguage,
+    EggExt, NetworkLanguage,
+    egg::{self, Analysis, EClass, EGraph, Id, Language},
 };
 use rustc_hash::FxHashMap;
 
-pub trait OptCostFunction<L: Language, A: Analysis<L>> {
+pub trait OptCostFunction<L: Language, A: Analysis<L>>: Sized {
     type Cost: PartialOrd + Debug + Clone;
 
-    fn cost<C>(&mut self, eclass: &EClass<L, A::Data>, enode: &L, costs: C) -> Option<Self::Cost>
-    where
-        C: FnMut(Id) -> Self::Cost;
+    fn cost(
+        &mut self,
+        eclass: &EClass<L, A::Data>,
+        enode: &L,
+        choices: &Choices<Self, L, A>,
+    ) -> Option<Self::Cost>;
+}
+
+pub struct Choices<'g, CF: OptCostFunction<L, A>, L: Language, A: Analysis<L>> {
+    graph: &'g EGraph<L, A>,
+    costs: FxHashMap<Id, (CF::Cost, L)>,
+}
+
+impl<'g, CF: OptCostFunction<L, A>, L: Language, A: Analysis<L>> Choices<'g, CF, L, A> {
+    pub fn find_best(&self, class: Id) -> Option<&(CF::Cost, L)> {
+        self.costs.get(&self.graph.find(class))
+    }
 }
 
 /// An extractor heavily inspired by egg's [Extractor](eggmock::egg::Extractor), which allows
 /// ignoring certain nodes by returning [None] from their cost function.
 pub struct OptExtractor<'g, CF: OptCostFunction<L, A>, L: Language, A: Analysis<L>> {
-    graph: &'g EGraph<L, A>,
     cost_fn: CF,
-    costs: FxHashMap<Id, (CF::Cost, L)>,
+    costs: Choices<'g, CF, L, A>,
 }
 
 impl<'g, CF: OptCostFunction<L, A>, L: Language, A: Analysis<L>> OptExtractor<'g, CF, L, A> {
     pub fn new(graph: &'g EGraph<L, A>, cost_fn: CF) -> Self {
         let mut extractor = Self {
-            graph,
             cost_fn,
-            costs: FxHashMap::default(),
+            costs: Choices {
+                graph,
+                costs: Default::default(),
+            },
         };
         extractor.find_costs();
         extractor
     }
 
-    pub fn find_best_node(&self, class: Id) -> Option<&L> {
-        self.costs
-            .get(&self.graph.find(class))
-            .map(|(_, node)| node)
+    pub fn choices(&self) -> &Choices<'g, CF, L, A> {
+        &self.costs
     }
 
     fn find_costs(&mut self) {
         let mut changed = true;
         while changed {
             changed = false;
-            for class in self.graph.classes() {
+            for class in self.costs.graph.classes() {
                 let new_cost = self.determine_class_costs(class);
-                match (self.costs.get(&class.id), new_cost) {
+                match (self.costs.costs.get(&class.id), new_cost) {
                     (None, Some(new)) => {
-                        self.costs.insert(class.id, new);
+                        self.costs.costs.insert(class.id, new);
                         changed = true;
                     }
                     (Some(old), Some(new)) if new.0 < old.0 => {
-                        self.costs.insert(class.id, new);
+                        self.costs.costs.insert(class.id, new);
                         changed = true;
                     }
                     _ => (),
@@ -70,51 +83,20 @@ impl<'g, CF: OptCostFunction<L, A>, L: Language, A: Analysis<L>> OptExtractor<'g
     }
 
     fn opt_node_cost(&mut self, node: &L, class: &EClass<L, A::Data>) -> Option<CF::Cost> {
-        if node.all(|id| self.costs.contains_key(&id)) {
-            let res = self
-                .cost_fn
-                .cost(class, node, |id| self.costs[&self.graph.find(id)].0.clone());
-            res
+        if node.all(|id| self.costs.costs.contains_key(&id)) {
+            self.cost_fn.cost(class, node, &self.costs)
         } else {
             None
         }
     }
 }
 
-pub struct OptExtractionNetwork<E>(pub E, pub Vec<Id>);
-
-impl<CF, L, A> Network for OptExtractionNetwork<OptExtractor<'_, CF, L, A>>
-where
-    CF: OptCostFunction<L, A>,
-    L: NetworkLanguage,
-    A: Analysis<L>,
+impl<'a, CF: OptCostFunction<L, A>, L: NetworkLanguage, A: Analysis<L>> EggExt
+    for Choices<'a, CF, L, A>
 {
-    type Node = L::Node;
+    type Language = L;
 
-    fn outputs(&self) -> impl Iterator<Item = eggmock::Signal> {
-        self.1.iter().map(|id| IndexWrapper(&self.0).to_signal(*id))
-    }
-
-    fn node(&self, id: eggmock::Id) -> Self::Node {
-        self.0
-            .find_best_node(id.into())
-            .expect("class should be extractable")
-            .to_node(|id| IndexWrapper(&self.0).to_signal(id))
-            .expect("id should point to a non-not node")
-    }
-}
-
-struct IndexWrapper<'e, E>(&'e E);
-
-impl<CF, L, A> Index<Id> for IndexWrapper<'_, OptExtractor<'_, CF, L, A>>
-where
-    CF: OptCostFunction<L, A>,
-    L: NetworkLanguage,
-    A: Analysis<L>,
-{
-    type Output = L;
-
-    fn index(&self, index: Id) -> &Self::Output {
-        self.0.find_best_node(index).expect("class not extractable")
+    fn get_node(&self, id: egg::Id) -> &Self::Language {
+        &self.find_best(id).expect("class should be extractable").1
     }
 }
