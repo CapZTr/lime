@@ -1,10 +1,12 @@
 use eggmock::ReceiverFFI;
 use lime_generic::{
     CompilerSettings, CompilerStatistics,
+    CompilerStatisticsFfi,
     copy::placeholder::CellOrVar,
     cost::{Cost, EqualCosts, OperationCost},
     definitions::{Ambit, AmbitCellType, FELIX, FELIXCellType, IMPLY, PLiM, SIMDRAM},
-    generic_compiler_entrypoint,
+    generic_compiler_entrypoint, generic_compiler_with_program,
+    map_result_to_ffi,
     lime_generic_def::Instruction,
 };
 
@@ -26,6 +28,16 @@ pub extern "C" fn gp_compile_ambit<'a>(
     ReceiverFFI::new(generic_compiler_entrypoint(
         arch, AmbitCost, settings, false,
     ))
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn gp_compile_ambit_with_program<'a>(
+    settings: CompilerSettings,
+) -> ReceiverFFI<'a, CompilerStatisticsFfi> {
+    let arch = Ambit::new();
+    let recv = generic_compiler_with_program(arch, AmbitCost, settings, false);
+    let recv = map_result_to_ffi(recv);
+    ReceiverFFI::new(recv)
 }
 
 #[derive(Clone)]

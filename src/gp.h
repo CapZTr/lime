@@ -26,6 +26,8 @@ extern "C"
     uint64_t num_cells;
     uint64_t num_instr;
     bool validation_success;
+
+    const char* program_str = nullptr;
   };
   enum class rewriting_strategy
   {
@@ -53,13 +55,37 @@ extern "C"
     compilation_mode mode;
     candidate_selection_mode candidate_selection;
   };
+  void gp_free_program_string(char* ptr);
 }
+
+class ProgramStringGP {
+    char* ptr_ = nullptr;
+public:
+    ProgramStringGP() = default;
+    explicit ProgramStringGP(char* p): ptr_(p) {}
+    ~ProgramStringGP(){ reset(); }
+    void reset(){
+        if (ptr_) { gp_free_program_string(ptr_); ptr_ = nullptr; }
+    }
+    std::string str() const { return ptr_ ? std::string(ptr_) : ""; }
+    const char* c_str() const { return ptr_; }
+    explicit operator bool() const { return ptr_ != nullptr; }
+    ProgramStringGP(const ProgramStringGP&) = delete;
+    ProgramStringGP& operator=(const ProgramStringGP&) = delete;
+    ProgramStringGP(ProgramStringGP&& o) noexcept : ptr_(o.ptr_) { o.ptr_ = nullptr; }
+    ProgramStringGP& operator=(ProgramStringGP&& o) noexcept {
+        if (this != &o) { reset(); ptr_ = o.ptr_; o.ptr_ = nullptr; }
+        return *this;
+    }
+};
 
 extern "C"
 {
   eggmock::receiver_ffi<compiler_statistics> gp_compile_ambit( compiler_settings settings );
+  eggmock::receiver_ffi<compiler_statistics> gp_compile_ambit_with_program( compiler_settings settings );
   eggmock::receiver_ffi<compiler_statistics> gp_compile_simdram( compiler_settings settings );
   eggmock::receiver_ffi<compiler_statistics> gp_compile_imply( compiler_settings settings );
   eggmock::receiver_ffi<compiler_statistics> gp_compile_felix( compiler_settings settings );
   eggmock::receiver_ffi<compiler_statistics> gp_compile_plim( compiler_settings settings );
+  void gp_free_program_string(char* ptr);
 }

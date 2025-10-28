@@ -138,6 +138,13 @@ struct CompilerOutput<'a> {
     program: Program<'a>,
 }
 
+impl<'a> CompilerOutput<'a> {
+    #[inline]
+    pub fn borrow_program(&self) -> &Program<'a> {
+        &self.program
+    }
+}
+
 fn compiling_receiver<'a>(
     architecture: &'a Architecture,
     rules: &'a [Rewrite<MigLanguage, ()>],
@@ -249,7 +256,7 @@ extern "C" fn ambit_compile_ffi(
 impl CompilerStatistics {
     fn from_result(res: &CompilingReceiverResult) -> Self {
         let graph = &res.output.graph;
-        let c_string = CString::new(res.program_string).expect("CString conversion failed");
+        let c_string = CString::new(res.program_string.clone()).expect("CString conversion failed");
         let ptr = c_string.into_raw();
         CompilerStatistics {
             egraph_classes: graph.number_of_classes() as u64,
@@ -264,7 +271,7 @@ impl CompilerStatistics {
     }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn ambit_free_program_string(ptr: *mut c_char) {
     if !ptr.is_null() {
         unsafe {

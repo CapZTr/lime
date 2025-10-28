@@ -112,7 +112,7 @@ inline std::pair<mockturtle::mig_network, ambit_compiler_statistics> ambit_rewri
     preoptimize_mig( ntk );
   }
   mockturtle::mig_network out;
-  const auto stat = eggmock::send_ntk( ntk, eggmock::receiver(
+  auto stat = eggmock::send_ntk( ntk, eggmock::receiver(
                                                 ambit_rewrite_ffi( settings, eggmock::receive_into( out ) ) ) );
   program_out = ProgramString(const_cast<char*>(stat.program_str));
   stat.program_str = nullptr;
@@ -138,8 +138,18 @@ inline ambit_compiler_statistics ambit_compile(
   {
     preoptimize_mig( ntk );
   }
-  const auto stat = eggmock::send_ntk( ntk, eggmock::receiver( ambit_compile_ffi( settings ) ) );
+  auto stat = eggmock::send_ntk( ntk, eggmock::receiver( ambit_compile_ffi( settings ) ) );
   program_out = ProgramString(const_cast<char*>(stat.program_str));
   stat.program_str = nullptr;
   return stat;
+}
+
+inline ambit_compiler_statistics ambit_compile(
+    ambit_compiler_settings settings,
+    mockturtle::mig_network& ntk)
+{
+    ProgramString dummy;
+    auto stat = ambit_compile(settings, ntk, dummy);
+    stat.program_str = nullptr;
+    return stat;
 }

@@ -1,3 +1,4 @@
+#include "ambit.h"
 #include "gp.h"
 #include "utils.h"
 
@@ -21,13 +22,17 @@ int main()
   in.create_po( in.create_xor3( in.create_pi(), in.create_pi(), in.create_pi() ) );
   preoptimize( in );
 
-  ProgramString program_str;
-  const auto result = send_ntk( in, receiver( gp_compile_ambit( compiler_settings{
+  ProgramStringGP program_str;
+  auto result = send_ntk( in, receiver( gp_compile_ambit_with_program( compiler_settings{
                                         .rewriting = rewriting_strategy::none,
                                         .validator = new_validator( in ),
                                         .mode = compilation_mode::exhaustive,
                                         .candidate_selection = candidate_selection_mode::all,
-                                    } ) ) , program_str);
+                                    } ) ) );
+  if (result.program_str) {
+    program_str = ProgramStringGP(const_cast<char*>(result.program_str));
+    result.program_str = nullptr;
+  }
   std::cout << "Generated program:\n" << program_str.str() << "\n";
 
   std::cout << "total cost: " << result.num_instr << std::endl;
