@@ -172,7 +172,7 @@ where
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}({})", self.typ.name, self.inputs.iter().format(", "),)?;
         if !self.outputs.is_empty() {
-            write!(f, " -> {}", self.outputs.iter().format(", "))?;
+            write!(f, " -> ({})", self.outputs.iter().format(", "))?;
         }
         Ok(())
     }
