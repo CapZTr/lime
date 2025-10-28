@@ -23,8 +23,8 @@ target_link_libraries(lime_base PUBLIC eggmock lime_rs)
 add_executable(lime src/main.cpp)
 target_link_libraries(lime PRIVATE lime_base)
 
-add_executable(lime_ambit_benchmark src/ambit_benchmark_main.cpp)
-target_link_libraries(lime_ambit_benchmark PRIVATE lime_base)
+# add_executable(lime_ambit_benchmark src/ambit_benchmark_main.cpp)
+# target_link_libraries(lime_ambit_benchmark PRIVATE lime_base)
 
-add_executable(lime_gp_benchmark src/gp_benchmark_main.cpp)
-target_link_libraries(lime_gp_benchmark PRIVATE lime_base)
+# add_executable(lime_gp_benchmark src/gp_benchmark_main.cpp)
+# target_link_libraries(lime_gp_benchmark PRIVATE lime_base)
