@@ -1,11 +1,17 @@
 use eggmock::Id;
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxHashMap, FxHashSet};
 
-#[derive(Default, Debug)]
-pub struct Uses(FxHashMap<Id, usize>);
+#[derive(Debug)]
+pub struct Uses(FxHashMap<Id, usize>, FxHashSet<Id>);
 
 impl Uses {
+    pub fn new(never: impl IntoIterator<Item = Id>) -> Self {
+        Self(Default::default(), FxHashSet::from_iter(never))
+    }
     pub fn get(&self, id: Id) -> usize {
+        if self.1.contains(&id) {
+            return 0;
+        }
         self.0.get(&id).copied().unwrap_or(0)
     }
 }
@@ -33,7 +39,7 @@ impl<'a> UsesSavepoint<'a> {
         let entry = self.uses.0.entry(id).or_default();
         self.increments.push(id);
         *entry += 1;
-        *entry
+        if self.uses.1.contains(&id) { 0 } else { *entry }
     }
     pub fn replay(&mut self, mut delta: UsesDelta) {
         for &id in &delta.0 {
@@ -71,7 +77,7 @@ mod tests {
 
     #[test]
     pub fn test_uses() {
-        let mut uses = Uses::default();
+        let mut uses = Uses::new([Id::from_usize(0); 0]);
         let id0 = Id::from(0);
         let id1 = Id::from(1);
 
