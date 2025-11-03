@@ -95,11 +95,14 @@ pub fn generic_compiler_entrypoint<CT: CellType, C: OperationCost<CT>>(
         eprintln!("=== final program:");
         eprintln!("{}", result.program);
 
+        eprintln!("=== output cells:");
+        eprintln!("{}", result.outputs.iter().join("\n"));
+
         let validation_success =
             match rebuild_network(&result.program, &input_cells, &result.outputs) {
                 Ok(ntk) => ntk.send(settings.validator.with_input()),
                 Err(err) => {
-                    println!("could not rebuild network: {err:?}");
+                    eprintln!("could not rebuild network: {err:?}");
                     false
                 }
             };

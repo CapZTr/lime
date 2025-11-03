@@ -63,7 +63,7 @@ impl<'a, CT: CellType, G: Gate> State<'a, CT, G> {
             program: Default::default(),
             cells,
             candidates,
-            uses: Default::default(),
+            uses: Uses::new(params.network.leaves().iter().copied()),
             network,
             output_ids,
         }
